@@ -1,0 +1,22 @@
+ARG PYTHON_VERSION=3.14
+
+FROM python:${PYTHON_VERSION}-slim
+
+# Set working directory to /app (project root)
+WORKDIR /app
+
+# Copy src folder to /app/src
+COPY src /app/src
+
+# Copy uv.lock and pyproject.toml to /app
+COPY uv.lock /app/uv.lock
+COPY pyproject.toml /app/pyproject.toml
+
+RUN pip install uv
+RUN uv sync
+
+# Copy entrypoint.sh to /app
+COPY provision/entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
+ENTRYPOINT [ "/app/entrypoint.sh" ]
