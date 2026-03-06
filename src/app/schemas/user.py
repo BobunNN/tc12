@@ -1,7 +1,9 @@
 from datetime import UTC, datetime
+from typing import Literal
 
-from pydantic import EmailStr
-from sqlmodel import Field, SQLModel, DateTime
+from pydantic import EmailStr, field_validator
+from sqlmodel import AutoString, Field, SQLModel, DateTime
+from pydantic_extra_types.phone_numbers import PhoneNumber
 
 
 class UserBase(SQLModel):
@@ -15,7 +17,59 @@ class UserCreate(UserBase):
     password: str = Field(min_length=8, max_length=128)
 
 
-class User(UserBase, table=True):
+class FrPhoneNumber(PhoneNumber):
+    default_region_code = "FR"
+
+
+class UserTennisInfo(SQLModel):
+    gender: Literal["man", "woman"] | None = Field(default=None, sa_type=AutoString)
+    birth_date: datetime | None = Field(default=None)
+    looking_for_playmate: bool = Field(
+        default=False, description="Player is looking for other tennis playmate"
+    )
+    tennis_availability: str | None = Field(
+        default=None,
+        description="Player looking for tennis playmate should add when they are available",
+    )
+    phone_number: FrPhoneNumber | None
+    tennis_ranking: (
+        Literal[
+            "NC",
+            "40",
+            "30/5",
+            "30/4",
+            "30/3",
+            "30/2",
+            "30/1",
+            "30",
+            "15/5",
+            "15/4",
+            "15/3",
+            "15/2",
+            "15/1",
+            "15",
+            "5/6",
+            "4/6",
+            "3/6",
+            "2/6",
+            "1/6",
+            "0",
+        ]
+        | None
+    ) = Field(default=None, sa_type=AutoString)
+    tennis_ranking_comment: str | None = Field(
+        description="Mainly for unranked or players with decayed ranking",
+        max_length=300,
+    )
+
+    @field_validator("birth_date")
+    def parse_birth_date(cls, value):
+        if isinstance(value, str):
+            return datetime.strptime(value, "%Y-%m")
+        return value
+
+
+class User(UserBase, UserTennisInfo, table=True):
     __tablename__ = "user_accounts"
     id: int | None = Field(default=None, primary_key=True, index=True, nullable=False)
     hashed_password: str
@@ -25,12 +79,12 @@ class User(UserBase, table=True):
     )
 
 
-class UserUpdate(UserBase):
+class UserUpdate(UserBase, UserTennisInfo):
     email: EmailStr | None = Field(default=None, max_length=255)  # type: ignore
     password: str | None = Field(default=None, min_length=8, max_length=128)
 
 
-class UserUpdateMe(SQLModel):
+class UserUpdateMe(UserTennisInfo):
     first_name: str = Field(max_length=30)
     last_name: str = Field(max_length=30)
     email: EmailStr | None = Field(default=None, max_length=255)
