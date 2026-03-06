@@ -11,6 +11,7 @@ class UserBase(SQLModel):
     last_name: str = Field(max_length=30)
     email: EmailStr = Field(max_length=30, unique=True, nullable=False)
     is_superuser: bool = False
+    is_trainer: bool = False
 
 
 class UserCreate(UserBase):
