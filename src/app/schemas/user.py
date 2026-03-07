@@ -32,7 +32,7 @@ class UserTennisInfo(SQLModel):
         default=None,
         description="Player looking for tennis playmate should add when they are available",
     )
-    phone_number: FrPhoneNumber | None
+    phone_number: FrPhoneNumber | None = Field(default=None)
     tennis_ranking: (
         Literal[
             "NC",
@@ -59,6 +59,7 @@ class UserTennisInfo(SQLModel):
         | None
     ) = Field(default=None, sa_type=AutoString)
     tennis_ranking_comment: str | None = Field(
+        default=None,
         description="Mainly for unranked or players with decayed ranking",
         max_length=300,
     )
