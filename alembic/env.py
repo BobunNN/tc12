@@ -3,6 +3,10 @@ from logging.config import fileConfig
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from src.app.schemas.user import User #noqa
+<<<<<<< HEAD
+from src.app.schemas.training_sessions import * #noqa
+=======
+>>>>>>> main
 from alembic import context
 from sqlmodel import SQLModel
 
