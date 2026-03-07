@@ -22,18 +22,11 @@ DUMMY_HASH = password_hash.hash("dummypassword")
 #     return encoded_jwt
 
 
-<<<<<<< HEAD
 def create_access_token(data: dict | Any, expires_delta: timedelta) -> str:
     settings = get_settings()
     expire = datetime.now(timezone.utc) + expires_delta
     to_encode = data.copy()
     to_encode.update({"exp": expire})
-=======
-def create_access_token(subject: str | Any, expires_delta: timedelta) -> str:
-    settings = get_settings()
-    expire = datetime.now(timezone.utc) + expires_delta
-    to_encode = {"exp": expire, "sub": str(subject)}
->>>>>>> main
     encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
