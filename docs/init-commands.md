@@ -1,9 +1,29 @@
+<<<<<<< HEAD
 Repo init commands
+=======
+<<<<<<< HEAD
+Repo init commands
+=======
+
+
+# docs/
+
+This folder is for documentation related to extending and maintaining the FastAPI template.
+
+## Init commands
+>>>>>>> dev
+>>>>>>> main
 
 ````[bash]
 git init
 uv init --python "python>=[version]"
 uv add fastapi --extra standard 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+````
+=======
+>>>>>>> main
 ````
 
 ## Extending the Template
@@ -26,3 +46,7 @@ uv add fastapi --extra standard
 
 - Pre-commit hooks are configured in `.pre-commit-config.yaml`.
 - Run `pre-commit install` after cloning to enable hooks.
+<<<<<<< HEAD
+=======
+>>>>>>> dev
+>>>>>>> main
