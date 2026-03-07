@@ -1,7 +1,13 @@
 import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware  # noqa
-from src.app.routers import users, login, exceptions_manager
+from src.app.routers import (
+    substitutions,
+    training_sessions,
+    users,
+    login,
+    exceptions_manager,
+)
 
 # Basic logging configuration
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -21,6 +27,8 @@ exceptions_manager.register_exception_handlers(app)
 
 app.include_router(users.router)
 app.include_router(login.router)
+app.include_router(substitutions.router)
+app.include_router(training_sessions.router)
 
 
 @app.get(
