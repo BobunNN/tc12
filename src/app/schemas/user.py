@@ -64,10 +64,10 @@ class UserTennisInfo(SQLModel):
         max_length=300,
     )
 
-    @field_validator("birth_date")
+    @field_validator("birth_date", mode="before")
     def parse_birth_date(cls, value):
         if isinstance(value, str):
-            return datetime.strptime(value, "%Y-%m")
+            return datetime.strptime(value, "%m/%Y")
         return value
 
 
