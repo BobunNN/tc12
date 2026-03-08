@@ -37,7 +37,7 @@ SessionDep = Annotated[Session, Depends(get_db)]
 SettingsDep = Annotated[Settings, Depends(get_settings)]
 
 
-async def get_current_user(
+def get_current_user(
     session: SessionDep,
     token: TokenDep,
     settings: SettingsDep,
@@ -55,7 +55,15 @@ async def get_current_user(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Could not validate credentials",
         )
-    user = session.get(User, token_data.sub)
+
+    if not token_data.sub or not token_data.sub.isdigit():
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid user ID format in token",
+        )
+
+    user = session.get(User, int(token_data.sub))
+
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found"
@@ -63,7 +71,7 @@ async def get_current_user(
     for scope in security_scopes.scopes:
         if scope not in token_data.scopes:
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
+                status_code=status.HTTP_403_FORBIDDEN,
                 detail="Not enough permissions",
                 headers={"WWW-Authenticate": authenticate_value},
             )
@@ -79,5 +87,6 @@ def get_current_active_superuser(current_user: CurrentUser) -> User:
             status_code=403, detail="The user doesn't have enough privileges"
         )
     return current_user
+
 
 TrainerScope = Annotated[User, Security(get_current_user, scopes=["admin", "trainer"])]
