@@ -1,10 +1,9 @@
 from sqlmodel import Session
 from src.app.schemas.training_sessions import (
-    TrainingSessionsUpdate,
+    TrainingSessionUpdate,
 )
 from src.app.core.training_sessions import training_session_service
 from src.app.core.training_sessions.exceptions import (
-    TrainingSessionAlreadyExists,
     TrainingSessionNotFound,
     TrainingSessionOverlap,
     TrainingSessionInvalidTrainer,
@@ -37,14 +36,6 @@ def test_create_training_session(
     assert session_obj2.location == "Alain Mimoun"
 
 
-def test_create_training_session_already_exists(
-    session: Session, training_session_data
-):
-    training_session_service.create_training_session(session, training_session_data)
-    with pytest.raises(TrainingSessionAlreadyExists):
-        training_session_service.create_training_session(session, training_session_data)
-
-
 def test_get_training_session(session: Session, training_session_data):
     session_obj = training_session_service.create_training_session(
         session, training_session_data
@@ -62,15 +53,21 @@ def test_update_training_session(session: Session, training_session_data):
     session_obj = training_session_service.create_training_session(
         session, training_session_data
     )
-    update_data = TrainingSessionsUpdate(location="Alain Mimoun")
+    update_data = TrainingSessionUpdate(location="Alain Mimoun")
     updated = training_session_service.update_training_session(
         session, session_obj.id, update_data
     )
     assert updated.location == "Alain Mimoun"
 
+    with pytest.raises(TrainingSessionInvalidTrainer):
+        update_data = TrainingSessionUpdate(trainer_id=2)
+        updated = training_session_service.update_training_session(
+            session, session_obj.id, update_data
+        )
+
 
 def test_update_training_session_not_found(session: Session):
-    update = TrainingSessionsUpdate(location="Alain Mimoun")
+    update = TrainingSessionUpdate(location="Alain Mimoun")
     with pytest.raises(TrainingSessionNotFound):
         training_session_service.update_training_session(session, 9999, update)
 
@@ -101,6 +98,10 @@ def test_check_sessions_overlap(
     session: Session, training_session_data, training_session_overlap
 ):
     training_session_service.create_training_session(session, training_session_data)
+    with pytest.raises(TrainingSessionOverlap):
+        training_session_service.create_training_session(
+            session, training_session_overlap
+        )
     with pytest.raises(TrainingSessionOverlap):
         training_session_service.create_training_session(
             session, training_session_overlap

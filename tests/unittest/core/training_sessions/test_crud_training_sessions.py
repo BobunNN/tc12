@@ -1,6 +1,6 @@
 from sqlmodel import Session
 from src.app.core.training_sessions import crud_training_sessions
-from src.app.schemas.training_sessions import TrainingSessionsUpdate
+from src.app.schemas.training_sessions import TrainingSessionUpdate
 
 
 def test_write_training_session(session: Session, training_session_data):
@@ -31,7 +31,7 @@ def test_update_training_session(session: Session, training_session_data):
     session_obj = crud_training_sessions.write_training_session(
         session, training_session_data
     )
-    update_data = TrainingSessionsUpdate(location="Alain Mimoun")
+    update_data = TrainingSessionUpdate(location="Alain Mimoun")
     updated = crud_training_sessions.patch_training_session(
         session, session_obj, update_data
     )
