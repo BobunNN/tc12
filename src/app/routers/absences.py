@@ -5,11 +5,10 @@ from src.app.dependencies import (
     CurrentUser,
     SessionDep,
     get_current_active_superuser,
-    get_current_user,
 )
 from src.app.schemas.training_sessions import Absences
 from src.app.core.absences.absence_service import (
-    create_absence_service,
+    open_absence_slot,
     get_all_absences_service,
     delete_absence_service,
     search_unique_absence,
@@ -20,7 +19,10 @@ router = APIRouter(tags=["absences"])
 
 @router.post("/v1/absences")
 def create_absence(session: SessionDep, absence: Absences, current_user: CurrentUser):
-    return create_absence_service(session, absence, current_user)
+    print("YES")
+    print(type(absence))
+    print(type(absence.absence_date))
+    return open_absence_slot(session, absence, current_user)
 
 
 @router.get(
@@ -49,7 +51,6 @@ def get_self_absences(
 )
 def get_absence(
     session: SessionDep,
-    absence_id: int,
     trainee_id: int,
     training_id: int,
     training_date: datetime,
@@ -67,8 +68,21 @@ def get_all_absences(session: SessionDep):
     return get_all_absences_service(session)
 
 
-@router.delete("/v1/absences/{absence_id}", dependencies=[Depends(get_current_user)])
-def delete_absence(session: SessionDep, absence_id: int):
+@router.delete("/v1/absences/{absence_id}",)
+def delete_absence(session: SessionDep, absence_id: int, current_user: CurrentUser):
+    """
+    Deletes an absence if the current user owens it
+
+    Args:
+        session (SessionDep): _description_
+        absence_id (int): _description_
+
+    Raises:
+        HTTPException: _description_
+
+    Returns:
+        _type_: _description_
+    """
     success = delete_absence_service(session, absence_id)
     if not success:
         raise HTTPException(status_code=404, detail="Absence not found")

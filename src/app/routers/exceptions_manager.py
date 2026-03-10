@@ -7,7 +7,13 @@ from src.app.core.users.exceptions import (
     SuperUserSelfDeleteForbidden,
     SelfDeleteNotAllowedHere,
 )
-from src.app.core.absences.exceptions import AbsenceNotFound
+from src.app.core.absences.exceptions import (
+    AbsenceNotFound,
+    AbsenceDateMismatchSessionDay,
+    TrainerDoesNotManageTrainingSession,
+    AbsenceAlreadyExists,
+    TraineeNotRegisteredForSession,
+)
 from src.app.core.training_sessions.exceptions import (
     TrainingSessionAlreadyExists,
     TrainingSessionOverlap,
@@ -30,6 +36,17 @@ def register_exception_handlers(app: FastAPI):
 
     # Absences
     app.add_exception_handler(AbsenceNotFound, handle_absence_not_found)
+    app.add_exception_handler(
+        AbsenceDateMismatchSessionDay, handle_absence_date_mismatch_session_day
+    )
+    app.add_exception_handler(
+        TrainerDoesNotManageTrainingSession,
+        handle_trainer_does_not_manage_training_session,
+    )
+    app.add_exception_handler(AbsenceAlreadyExists, handle_absence_already_exists)
+    app.add_exception_handler(
+        TraineeNotRegisteredForSession, handle_trainee_not_registered_for_session
+    )
 
     # Training sessions
     app.add_exception_handler(
@@ -89,6 +106,40 @@ async def handle_absence_not_found(request: Request, exc: AbsenceNotFound):
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
         detail="Absence not found",
+    )
+
+
+async def handle_absence_date_mismatch_session_day(
+    request: Request, exc: AbsenceDateMismatchSessionDay
+):
+    raise HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail="Absence date does not match session day",
+    )
+
+
+async def handle_trainer_does_not_manage_training_session(
+    request: Request, exc: TrainerDoesNotManageTrainingSession
+):
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="Trainer does not manage this training session",
+    )
+
+
+async def handle_absence_already_exists(request: Request, exc: AbsenceAlreadyExists):
+    raise HTTPException(
+        status_code=status.HTTP_409_CONFLICT,
+        detail="Absence already exists",
+    )
+
+
+async def handle_trainee_not_registered_for_session(
+    request: Request, exc: TraineeNotRegisteredForSession
+):
+    raise HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail="Trainee not registered for this session",
     )
 
 

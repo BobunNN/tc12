@@ -7,7 +7,7 @@ from typing import Optional
 class TrainingSessions(SQLModel, table=True):
     __tablename__ = "training_sessions"
     id: int | None = Field(default=None, primary_key=True, index=True, nullable=False)
-    day: Literal[1, 2, 3, 4, 5, 6, 7] = Field(default=None, sa_type=AutoString)
+    day: Literal[0, 1, 2, 3, 4, 5, 6] = Field(default=None, sa_type=AutoString)
     trainer_id: int | None = Field(default=None, foreign_key="user_accounts.id")
     session_start: time = Field(default=time(hour=10), description="e.g., 19:15")
     session_duration: int = Field(default=60, description="Session duration in MINUTES")
