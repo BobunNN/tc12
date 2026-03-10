@@ -12,6 +12,9 @@ from src.app.core.training_sessions.exceptions import (
     TrainingSessionAlreadyExists,
     TrainingSessionOverlap,
     TrainingSessionInvalidTrainer,
+    TrainingSessionNotFound,
+    TraineesHasOverlappingSessions,
+    TrainingSessionMaxCapacity,
 )
 
 
@@ -34,6 +37,13 @@ def register_exception_handlers(app: FastAPI):
     )
     app.add_exception_handler(TrainingSessionOverlap, handle_training_overlap)
     app.add_exception_handler(TrainingSessionInvalidTrainer, handle_invalid_trainer)
+    app.add_exception_handler(
+        TrainingSessionNotFound, handle_training_session_not_found
+    )
+    app.add_exception_handler(
+        TraineesHasOverlappingSessions, handle_trainee_has_overlapping_sessions
+    )
+    app.add_exception_handler(TrainingSessionMaxCapacity, handle_session_max_capacity)
 
 
 async def validation_exception_handler(request, exc: ValidationError):
@@ -102,4 +112,31 @@ async def handle_invalid_trainer(request: Request, exc: TrainingSessionInvalidTr
     raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
         detail="User id is not a trainer",
+    )
+
+
+async def handle_training_session_not_found(
+    request: Request, exc: TrainingSessionNotFound
+):
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="Training session not found",
+    )
+
+
+async def handle_trainee_has_overlapping_sessions(
+    request: Request, exc: TraineesHasOverlappingSessions
+):
+    raise HTTPException(
+        status_code=status.HTTP_409_CONFLICT,
+        detail="Trainee has overlapping session",
+    )
+
+
+async def handle_session_max_capacity(
+    request: Request, exc: TrainingSessionMaxCapacity
+):
+    raise HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail="Trainee session max capacity reached",
     )

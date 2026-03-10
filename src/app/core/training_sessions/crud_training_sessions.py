@@ -107,3 +107,13 @@ def get_session_trainees_with_filters(
             statement = statement.where(column == value)
     statement = statement.offset(offset).limit(limit)
     return session.exec(statement).all()
+
+
+def write_trainee_session_assignement(
+    session: Session, trainee_session_assignement: TrainingSessionTrainees
+) -> TrainingSessionTrainees:
+    db_obj = TrainingSessionTrainees.model_validate(trainee_session_assignement)
+    session.add(db_obj)
+    session.commit()
+    session.refresh(db_obj)
+    return db_obj

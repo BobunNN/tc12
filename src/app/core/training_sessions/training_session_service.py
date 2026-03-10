@@ -3,10 +3,13 @@ from typing import Any
 
 from sqlmodel import Session
 from src.app.core.training_sessions.exceptions import (
+    TraineeIsTrainer,
     TrainingSessionAlreadyExists,
     TrainingSessionInvalidTrainer,
+    TrainingSessionMaxCapacity,
     TrainingSessionNotFound,
     TrainingSessionOverlap,
+    TraineesHasOverlappingSessions,
 )
 
 from src.app.core.training_sessions.crud_training_sessions import (
@@ -17,6 +20,7 @@ from src.app.core.training_sessions.crud_training_sessions import (
     write_training_session,
     patch_training_session,
     delete_training_session,
+    write_trainee_session_assignement,
 )
 from src.app.core.users.user_service import check_is_trainer
 from src.app.schemas.training_sessions import (
@@ -25,6 +29,9 @@ from src.app.schemas.training_sessions import (
     TrainingSessionsUpdate,
 )
 from src.app.schemas.user import User
+
+
+TRAINING_SESSION_MAX_CAPACITY = 4
 
 
 def create_training_session(
@@ -45,26 +52,36 @@ def create_training_session(
 
 def check_sessions_overlap(
     session: Session,
-    session_create: TrainingSessions,
+    training_session: TrainingSessions,
 ) -> bool:
+    """
+    Checks is the training session passed is overlapping with existing training session, which includes time, location and court number
+
+    Args:
+        session (Session): _description_
+        training_session (TrainingSessions): _description_
+
+    Returns:
+        bool: _description_
+    """
     filters = {
-        "location": session_create.location,
-        "court_number": session_create.court_number,
-        "day": session_create.day,
+        "location": training_session.location,
+        "court_number": training_session.court_number,
+        "day": training_session.day,
     }
 
     potential_overlaps: list[TrainingSessions] = get_training_sessions_with_filters(
         session, filters
     )
 
-    if isinstance(session_create.session_start, str):
-        new_start = datetime.strptime(session_create.session_start, "%H:%M:%S").time()
-    elif isinstance(session_create.session_start, time):
-        new_start = session_create.session_start
+    if isinstance(training_session.session_start, str):
+        new_start = datetime.strptime(training_session.session_start, "%H:%M:%S").time()
+    elif isinstance(training_session.session_start, time):
+        new_start = training_session.session_start
 
     new_end = (
         datetime.combine(datetime.today(), new_start)
-        + timedelta(minutes=session_create.session_duration)
+        + timedelta(minutes=training_session.session_duration)
     ).time()
 
     for s in potential_overlaps:
@@ -172,3 +189,73 @@ def bulk_load_training_sessions(session: Session, records: list[dict]) -> Any:
         except Exception as e:
             errors.append({"record": record, "error": str(e)})
     return {"loaded_count": len(loaded), "errors": errors}
+
+
+def assign_trainee_session(session: Session, trainee_id: int, session_id: int):
+    session_to_assign = get_training_session_by_id(session, session_id)
+    if not session_to_assign:
+        raise TrainingSessionNotFound
+
+    if check_is_trainer(session=session, id=trainee_id):
+        raise TraineeIsTrainer
+
+    if check_trainee_session_overlap(
+        session=session, trainee_id=trainee_id, session_to_assign=session_to_assign
+    ):
+        raise TraineesHasOverlappingSessions
+
+    trainees = get_session_trainees_with_filters(session, filters={"training_session_id": session_id})
+    if len(trainees) == TRAINING_SESSION_MAX_CAPACITY:
+        raise TrainingSessionMaxCapacity
+    
+    return write_trainee_session_assignement(
+        session,
+        TrainingSessionTrainees(training_session_id=session_id, trainee_id=trainee_id),
+    )
+
+
+def check_trainee_session_overlap(
+    session: Session, trainee_id: int, session_to_assign: TrainingSessions
+):
+    """
+    Checks is trainees has any overlapping training session e.g. session occuring at the same time
+
+    Args:
+        session (Session): _description_
+        trainee_id (int): _description_
+        session_to_assign (TrainingSessions): _description_
+
+    Returns:
+        _type_: _description_
+    """
+    trainee_sessions = get_session_trainees_with_filters(
+        session, {"trainee_id": trainee_id}
+    )
+    if isinstance(session_to_assign.session_start, str):
+        new_start = datetime.strptime(
+            session_to_assign.session_start, "%H:%M:%S"
+        ).time()
+    else:
+        new_start = session_to_assign.session_start
+    new_end = (
+        datetime.combine(datetime.today(), new_start)
+        + timedelta(minutes=session_to_assign.session_duration)
+    ).time()
+
+    for trainee_session in trainee_sessions:
+        existing_session = get_training_session_by_id(
+            session, trainee_session.training_session_id
+        )
+        if not existing_session:
+            continue
+            
+        if existing_session.day == session_to_assign.day:
+            existing_start = existing_session.session_start
+            existing_end = (
+                datetime.combine(datetime.today(), existing_start)
+                + timedelta(minutes=existing_session.session_duration)
+            ).time()
+            if new_start < existing_end and new_end > existing_start:
+                return True
+
+    return False
