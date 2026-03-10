@@ -111,4 +111,8 @@ class Token(SQLModel):
 
 class TokenPayload(SQLModel):
     sub: str | None = None
+<<<<<<< HEAD
     scopes: list[str] = []
+=======
+    scopes: list[str]
+>>>>>>> dev

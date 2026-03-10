@@ -35,6 +35,7 @@ app.include_router(absences.router)
 app.include_router(init_dev.router)
 
 
+
 @app.get(
     "/",
 )
