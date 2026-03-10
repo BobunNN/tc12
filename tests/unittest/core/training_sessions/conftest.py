@@ -3,9 +3,10 @@ from sqlmodel import SQLModel, Session, create_engine
 from src.app.schemas.user import User
 
 from src.app.schemas.training_sessions import (
-    TrainingSessionTrainees,
+    SessionTraineesLink,
+    TrainingSessionCreate,
     TrainingSessions,
-    TrainingSessionsUpdate,
+    TrainingSessionUpdate,
 )
 
 
@@ -53,8 +54,7 @@ def session():
 
 @pytest.fixture
 def training_session_data():
-    return TrainingSessions(
-        id=1,
+    return TrainingSessionCreate(
         day=1,
         trainer_id=1,
         session_start="10:00:00",
@@ -66,7 +66,7 @@ def training_session_data():
 
 @pytest.fixture
 def training_session_data2():
-    return TrainingSessions(
+    return TrainingSessionCreate(
         day=1,
         trainer_id=3,
         session_start="10:00:00",
@@ -90,14 +90,14 @@ def training_session_overlap():
 
 @pytest.fixture
 def training_session_update_overlap():
-    return TrainingSessionsUpdate(
+    return TrainingSessionUpdate(
         location="Leo Lagrange",
     )
 
 
 @pytest.fixture
 def training_session_invalid_trainer():
-    return TrainingSessions(
+    return TrainingSessionCreate(
         day=6,
         trainer_id=2,
         session_start="10:00:00",
@@ -135,7 +135,7 @@ def trainee_user(session):
 
 @pytest.fixture
 def trainee_session_link():
-    return TrainingSessionTrainees(
+    return SessionTraineesLink(
         training_session_id=1,
         trainee_id=2,
     )

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Security
 from src.app.dependencies import CurrentUser, SessionDep, get_current_user
-from src.app.schemas.training_sessions import TrainingSessions, TrainingSessionsUpdate
+from src.app.schemas.training_sessions import TrainingSessionCreate, TrainingSessionUpdate
 from src.app.core.training_sessions import (
     training_session_service,
 )
@@ -14,7 +14,7 @@ router = APIRouter(tags=["training_sessions"])
 )
 def create_training_session(
     session: SessionDep,
-    session_create: TrainingSessions,
+    session_create: TrainingSessionCreate,
 ):
     return training_session_service.create_training_session(session=session, session_create=session_create)
 
@@ -61,7 +61,7 @@ def get_all_training_sessions(session: SessionDep, offset: int = 0, limit: int =
 def update_training_session(
     session: SessionDep,
     session_id: int,
-    session_update: TrainingSessionsUpdate,
+    session_update: TrainingSessionUpdate,
 ):
     return training_session_service.update_training_session(
         session=session, session_id=session_id, session_update=session_update

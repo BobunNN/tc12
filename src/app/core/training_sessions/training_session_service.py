@@ -3,7 +3,6 @@ from typing import Any
 
 from sqlmodel import Session
 from src.app.core.training_sessions.exceptions import (
-    TrainingSessionAlreadyExists,
     TrainingSessionInvalidTrainer,
     TrainingSessionNotFound,
     TrainingSessionOverlap,
@@ -19,20 +18,18 @@ from src.app.core.training_sessions.crud_training_sessions import (
     delete_training_session,
 )
 from src.app.core.users.user_service import check_is_trainer
+from src.app.schemas.training_sessions import SessionTraineesLink
 from src.app.schemas.training_sessions import (
-    TrainingSessionTrainees,
+    TrainingSessionCreate,
     TrainingSessions,
-    TrainingSessionsUpdate,
+    TrainingSessionUpdate,
 )
 from src.app.schemas.user import User
 
 
 def create_training_session(
-    session: Session, session_create: TrainingSessions
+    session: Session, session_create: TrainingSessionCreate
 ) -> TrainingSessions:
-    existing = get_training_session_by_id(session, session_create.id)
-    if existing:
-        raise TrainingSessionAlreadyExists
 
     if check_sessions_overlap(session, session_create):
         raise TrainingSessionOverlap
@@ -45,7 +42,7 @@ def create_training_session(
 
 def check_sessions_overlap(
     session: Session,
-    session_create: TrainingSessions,
+    session_create: TrainingSessionCreate,
 ) -> bool:
     filters = {
         "location": session_create.location,
@@ -94,10 +91,8 @@ def get_self_training_session(session: Session, user: User) -> list[TrainingSess
         )
     else:
         trainees_search_filter = {"trainee_id": user.id}
-        user_sessions: list[TrainingSessionTrainees] = (
-            get_session_trainees_with_filters(
-                session=session, filters=trainees_search_filter
-            )
+        user_sessions: list[SessionTraineesLink] = get_session_trainees_with_filters(
+            session=session, filters=trainees_search_filter
         )
         sessions = []
         for user_session in user_sessions:
@@ -119,11 +114,15 @@ def get_all_training_session(session: Session) -> list[TrainingSessions]:
 def update_training_session(
     session: Session,
     session_id: int,
-    session_update: TrainingSessionsUpdate,
+    session_update: TrainingSessionUpdate,
 ) -> TrainingSessions:
     db_session = get_training_session_by_id(session, session_id)
     if not db_session:
         raise TrainingSessionNotFound
+
+    if session_update.trainer_id:
+        if not check_is_trainer(session=session, id=session_update.trainer_id):
+            raise TrainingSessionInvalidTrainer
 
     update_data = db_session.model_dump()
     update_fields = session_update.model_dump(exclude_unset=True)
@@ -153,7 +152,7 @@ def search_training_session(session: Session, session_id: int) -> TrainingSessio
 
 def search_session_trainees(
     session: Session, session_id: int
-) -> list[TrainingSessionTrainees]:
+) -> list[SessionTraineesLink]:
     search_filter = {"training_session_id": session_id}
     return get_session_trainees_with_filters(session=session, filters=search_filter)
 

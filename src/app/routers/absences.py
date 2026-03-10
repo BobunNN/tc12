@@ -7,7 +7,7 @@ from src.app.dependencies import (
     get_current_active_superuser,
     get_current_user,
 )
-from src.app.schemas.training_sessions import Absences
+from src.app.schemas.absences import Absences
 from src.app.core.absences.absence_service import (
     create_absence_service,
     get_all_absences_service,
