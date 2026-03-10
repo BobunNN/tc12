@@ -281,8 +281,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
-=======
 name = "fastapi-users-api-starter"
 version = "0.1.0"
 source = { virtual = "." }
@@ -318,7 +316,6 @@ dev = [
 ]
 
 [[package]]
->>>>>>> main
 name = "fastar"
 version = "0.8.0"
 source = { registry = "https://pypi.org/simple" }
@@ -536,7 +533,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
 name = "phonenumbers"
 version = "9.0.25"
 source = { registry = "https://pypi.org/simple" }
@@ -546,8 +542,6 @@ wheels = [
 ]
 
 [[package]]
-=======
->>>>>>> main
 name = "pluggy"
 version = "1.6.0"
 source = { registry = "https://pypi.org/simple" }
@@ -921,7 +915,6 @@ wheels = [
 ]
 
 [[package]]
-<<<<<<< HEAD
 name = "tc12-app"
 version = "0.1.0"
 source = { virtual = "." }
@@ -961,8 +954,6 @@ dev = [
 ]
 
 [[package]]
-=======
->>>>>>> main
 name = "typer"
 version = "0.24.1"
 source = { registry = "https://pypi.org/simple" }

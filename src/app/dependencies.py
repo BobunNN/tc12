@@ -15,7 +15,7 @@ from src.app.schemas.user import TokenPayload, User
 sqlite_file_name = "app.db"
 sqlite_url = f"sqlite:///{sqlite_file_name}"
 
-engine = create_engine(sqlite_url, echo=True)
+engine = create_engine(sqlite_url, echo=False)
 
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="/v1/login/token",
@@ -37,7 +37,7 @@ SessionDep = Annotated[Session, Depends(get_db)]
 SettingsDep = Annotated[Settings, Depends(get_settings)]
 
 
-async def get_current_user(
+def get_current_user(
     session: SessionDep,
     token: TokenDep,
     settings: SettingsDep,
@@ -52,10 +52,18 @@ async def get_current_user(
         token_data = TokenPayload(**payload)
     except InvalidTokenError, ValidationError:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
+            status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
         )
-    user = session.get(User, token_data.sub)
+
+    if not token_data.sub or not token_data.sub.isdigit():
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid user ID format in token",
+        )
+
+    user = session.get(User, int(token_data.sub))
+
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found"
@@ -63,7 +71,7 @@ async def get_current_user(
     for scope in security_scopes.scopes:
         if scope not in token_data.scopes:
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
+                status_code=status.HTTP_403_FORBIDDEN,
                 detail="Not enough permissions",
                 headers={"WWW-Authenticate": authenticate_value},
             )

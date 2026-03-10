@@ -2,7 +2,6 @@ from sqlmodel import Session, select
 from src.app.schemas.training_sessions import SubstitutionRequests
 
 
-# CRUD for SubstitutionRequests
 def create_substitution_request(
     session: Session, request_create: SubstitutionRequests
 ) -> SubstitutionRequests:
@@ -46,3 +45,34 @@ def delete_substitution_request(session: Session, request_id: int) -> bool:
         session.commit()
         return True
     return False
+
+
+def get_substitution_requests_with_filters(
+    session: Session,
+    filters: dict,
+    offset: int = 0,
+    limit: int = 100
+) -> list[SubstitutionRequests]:
+    """
+    Fetch substitution requests with filters.
+
+    Args:
+        session (Session): SQLModel session.
+        filters (dict): Dictionary of filters where keys are column names of SubstitutionRequests and values are the values to filter by.
+            Example: {"user_id": 123, "status": "pending"}
+        offset (int): Pagination offset.
+        limit (int): Pagination limit.
+
+    Returns:
+        list[SubstitutionRequests]: List of filtered substitution requests.
+
+    Note:
+        Only exact matches are supported. Keys must correspond to valid SubstitutionRequests attributes.
+    """
+    statement = select(SubstitutionRequests)
+    for key, value in filters.items():
+        column = getattr(SubstitutionRequests, key, None)
+        if column is not None:
+            statement = statement.where(column == value)
+    statement = statement.offset(offset).limit(limit)
+    return session.exec(statement).all()

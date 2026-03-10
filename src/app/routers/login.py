@@ -29,9 +29,15 @@ async def login_for_access_token(
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    scopes = form_data.scopes.copy()
+    if user.is_superuser and "admin" not in scopes:
+        scopes.append("admin")
+        scopes.append("trainer")
+    if user.is_trainer and "trainer" not in scopes:
+        scopes.append("trainer")
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user.id, "scopes": form_data.scopes},
+        data={"sub": str(user.id), "scopes": form_data.scopes},
         expires_delta=access_token_expires,
     )
     return Token(access_token=access_token, token_type="bearer")

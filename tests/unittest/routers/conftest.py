@@ -70,7 +70,7 @@ def session_fixture():
     SQLModel.metadata.drop_all(engine)
 
 
-@pytest.fixture(name="client")
+@pytest.fixture(name="client", autouse=True)
 def client_fixture(session: Session):
     def get_db_override():
         yield session
@@ -83,11 +83,13 @@ def client_fixture(session: Session):
 
 @pytest.fixture(name="superuser_token_headers")
 def superuser_token_headers_fixture():
-    access_token = create_access_token(subject=1, expires_delta=timedelta(minutes=30))
+    data = {"sub": '1', "scopes": ["admin", "trainer"]}
+    access_token = create_access_token(data=data, expires_delta=timedelta(minutes=30))
     return {"Authorization": f"Bearer {access_token}"}
 
 
 @pytest.fixture(name="normal_user_token_headers")
 def normal_user_token_headers_fixture():
-    access_token = create_access_token(subject=2, expires_delta=timedelta(minutes=30))
+    data = {"sub": '2', "scopes": ["user"]}
+    access_token = create_access_token(data=data, expires_delta=timedelta(minutes=30))
     return {"Authorization": f"Bearer {access_token}"}
