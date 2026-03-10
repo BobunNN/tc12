@@ -1,5 +1,5 @@
 from sqlmodel import Session, select
-from src.app.schemas.training_sessions import SubstitutionRequests
+from src.app.schemas.substitution_requests import SubstitutionRequests
 
 
 def create_substitution_request(

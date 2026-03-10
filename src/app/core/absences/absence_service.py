@@ -13,10 +13,10 @@ from src.app.core.training_sessions.training_session_service import (
     search_session_trainees,
 )
 from src.app.schemas.training_sessions import (
-    Absences,
-    TrainingSessionTrainees,
+    SessionTraineesLink,
     TrainingSessions,
 )
+from src.app.schemas.absences import Absences
 from src.app.schemas.user import User
 
 from src.app.core.absences.crud_absences import (
@@ -44,7 +44,7 @@ def open_absence_slot(
             raise TrainerDoesNotManageTrainingSession
 
         session_filters = {"trainee_id": user.id}
-        user_sessions: list[TrainingSessionTrainees] = search_session_trainees(
+        user_sessions: list[SessionTraineesLink] = search_session_trainees(
             session=session, filters=session_filters
         )
         user_training_ids = [ts.training_session_id for ts in user_sessions]
@@ -54,9 +54,9 @@ def open_absence_slot(
     else:
         if not (absence_create.trainee_id == user.id):
             raise AbsenceTraineeIdMismatch
-        
+
         session_filters = {"trainee_id": user.id}
-        user_sessions: list[TrainingSessionTrainees] = search_session_trainees(
+        user_sessions: list[SessionTraineesLink] = search_session_trainees(
             session=session, filters=session_filters
         )
         user_training_ids = [ts.training_session_id for ts in user_sessions]

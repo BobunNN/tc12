@@ -1,8 +1,8 @@
 from sqlmodel import Session, select
 from src.app.schemas.training_sessions import (
-    TrainingSessionTrainees,
+    SessionTraineesLink,
     TrainingSessions,
-    TrainingSessionsUpdate,
+    TrainingSessionUpdate,
 )
 
 
@@ -34,7 +34,7 @@ def get_all_training_sessions(
 def patch_training_session(
     session: Session,
     db_session: TrainingSessions,
-    session_update: TrainingSessionsUpdate,
+    session_update: TrainingSessionUpdate,
 ) -> TrainingSessions:
     training_session_update_data = session_update.model_dump(exclude_unset=True)
     db_session.sqlmodel_update(training_session_update_data)
@@ -83,7 +83,7 @@ def get_training_sessions_with_filters(
 
 def get_session_trainees_with_filters(
     session: Session, filters: dict, offset: int = 0, limit: int = 100
-) -> list[TrainingSessionTrainees]:
+) -> list[SessionTraineesLink]:
     """
     Fetch session trainees with filters.
 
@@ -100,9 +100,9 @@ def get_session_trainees_with_filters(
     Note:
         Only exact matches are supported. Keys must correspond to valid TrainingSessionTrainees attributes.
     """
-    statement = select(TrainingSessionTrainees)
+    statement = select(SessionTraineesLink)
     for key, value in filters.items():
-        column = getattr(TrainingSessionTrainees, key, None)
+        column = getattr(SessionTraineesLink, key, None)
         if column is not None:
             statement = statement.where(column == value)
     statement = statement.offset(offset).limit(limit)
@@ -110,9 +110,9 @@ def get_session_trainees_with_filters(
 
 
 def write_trainee_session_assignement(
-    session: Session, trainee_session_assignement: TrainingSessionTrainees
-) -> TrainingSessionTrainees:
-    db_obj = TrainingSessionTrainees.model_validate(trainee_session_assignement)
+    session: Session, trainee_session_assignement: SessionTraineesLink
+) -> SessionTraineesLink:
+    db_obj = SessionTraineesLink.model_validate(trainee_session_assignement)
     session.add(db_obj)
     session.commit()
     session.refresh(db_obj)

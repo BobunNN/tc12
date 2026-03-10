@@ -6,7 +6,7 @@ from src.app.dependencies import (
     SessionDep,
     get_current_active_superuser,
 )
-from src.app.schemas.training_sessions import Absences
+from src.app.schemas.absences import Absences
 from src.app.core.absences.absence_service import (
     open_absence_slot,
     get_all_absences_service,
@@ -68,7 +68,9 @@ def get_all_absences(session: SessionDep):
     return get_all_absences_service(session)
 
 
-@router.delete("/v1/absences/{absence_id}",)
+@router.delete(
+    "/v1/absences/{absence_id}",
+)
 def delete_absence(session: SessionDep, absence_id: int, current_user: CurrentUser):
     """
     Deletes an absence if the current user owens it
