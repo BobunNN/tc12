@@ -7,6 +7,8 @@ from src.app.routers import (
     users,
     login,
     exceptions_manager,
+    absences,
+    init_dev,
 )
 
 # Basic logging configuration
@@ -29,6 +31,8 @@ app.include_router(users.router)
 app.include_router(login.router)
 app.include_router(substitutions.router)
 app.include_router(training_sessions.router)
+app.include_router(absences.router)
+app.include_router(init_dev.router)
 
 
 @app.get(

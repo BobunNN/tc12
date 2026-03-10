@@ -104,3 +104,10 @@ def register_user(session: Session, user_in: UserRegister) -> User:
     user_create = UserCreate.model_validate(user_in)
     user = crud_users.create_user(session=session, user_create=user_create)
     return user
+
+
+def check_is_trainer(session: Session, id: int) -> bool:
+    user = crud_users.get_user_by_id(session=session, user_id=id)
+    if not user:
+        raise UserNotFound
+    return user.is_trainer

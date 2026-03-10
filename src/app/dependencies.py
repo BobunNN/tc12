@@ -15,7 +15,7 @@ from src.app.schemas.user import TokenPayload, User
 sqlite_file_name = "app.db"
 sqlite_url = f"sqlite:///{sqlite_file_name}"
 
-engine = create_engine(sqlite_url, echo=True)
+engine = create_engine(sqlite_url, echo=False)
 
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="/v1/login/token",
@@ -52,7 +52,7 @@ def get_current_user(
         token_data = TokenPayload(**payload)
     except InvalidTokenError, ValidationError:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
+            status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
         )
 

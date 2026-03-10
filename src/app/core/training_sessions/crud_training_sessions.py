@@ -1,9 +1,13 @@
 from sqlmodel import Session, select
-from src.app.schemas.training_sessions import TrainingSessions, Absences
+from src.app.schemas.training_sessions import (
+    TrainingSessionTrainees,
+    TrainingSessions,
+    TrainingSessionsUpdate,
+)
 
 
 # CRUD for TrainingSessions
-def create_training_session(
+def write_training_session(
     session: Session, session_create: TrainingSessions
 ) -> TrainingSessions:
     db_obj = TrainingSessions.model_validate(session_create)
@@ -27,10 +31,13 @@ def get_all_training_sessions(
     return session.exec(statement).all()
 
 
-def update_training_session(
-    session: Session, db_session: TrainingSessions, session_update: dict
+def patch_training_session(
+    session: Session,
+    db_session: TrainingSessions,
+    session_update: TrainingSessionsUpdate,
 ) -> TrainingSessions:
-    db_session.sqlmodel_update(session_update)
+    training_session_update_data = session_update.model_dump(exclude_unset=True)
+    db_session.sqlmodel_update(training_session_update_data)
     session.add(db_session)
     session.commit()
     session.refresh(db_session)
@@ -46,41 +53,57 @@ def delete_training_session(session: Session, session_id: int) -> bool:
     return False
 
 
-# CRUD for Absences
-def create_absence(session: Session, absence_create: Absences) -> Absences:
-    db_obj = Absences.model_validate(absence_create)
-    session.add(db_obj)
-    session.commit()
-    session.refresh(db_obj)
-    return db_obj
+def get_training_sessions_with_filters(
+    session: Session, filters: dict, offset: int = 0, limit: int = 100
+) -> list[TrainingSessions]:
+    """
+    Fetch absences with filters.
 
+    Args:
+        session (Session): SQLModel session.
+        filters (dict): Dictionary of filters where keys are column names of TrainingSessions and values are the values to filter by.
+            Example: {"user_id": 123, "status": "pending"}
+        offset (int): Pagination offset.
+        limit (int): Pagination limit.
 
-def get_absence_by_id(session: Session, absence_id: int) -> Absences | None:
-    statement = select(Absences).where(Absences.id == absence_id)
-    return session.exec(statement).first()
+    Returns:
+        list[TrainingSessions]: List of filtered substitution requests.
 
-
-def get_all_absences(
-    session: Session, offset: int = 0, limit: int = 100
-) -> list[Absences]:
-    statement = select(Absences).offset(offset).limit(limit)
+    Note:
+        Only exact matches are supported. Keys must correspond to valid TrainingSessions attributes.
+    """
+    statement = select(TrainingSessions)
+    for key, value in filters.items():
+        column = getattr(TrainingSessions, key, None)
+        if column is not None:
+            statement = statement.where(column == value)
+    statement = statement.offset(offset).limit(limit)
     return session.exec(statement).all()
 
 
-def update_absence(
-    session: Session, db_absence: Absences, absence_update: dict
-) -> Absences:
-    db_absence.sqlmodel_update(absence_update)
-    session.add(db_absence)
-    session.commit()
-    session.refresh(db_absence)
-    return db_absence
+def get_session_trainees_with_filters(
+    session: Session, filters: dict, offset: int = 0, limit: int = 100
+) -> list[TrainingSessionTrainees]:
+    """
+    Fetch session trainees with filters.
 
+    Args:
+        session (Session): SQLModel session.
+        filters (dict): Dictionary of filters where keys are column names of TrainingSessionTrainees and values are the values to filter by.
+            Example: {"user_id": 123, "status": "pending"}
+        offset (int): Pagination offset.
+        limit (int): Pagination limit.
 
-def delete_absence(session: Session, absence_id: int) -> bool:
-    db_absence = get_absence_by_id(session, absence_id)
-    if db_absence:
-        session.delete(db_absence)
-        session.commit()
-        return True
-    return False
+    Returns:
+        list[TrainingSessionTrainees]: List of filtered substitution requests.
+
+    Note:
+        Only exact matches are supported. Keys must correspond to valid TrainingSessionTrainees attributes.
+    """
+    statement = select(TrainingSessionTrainees)
+    for key, value in filters.items():
+        column = getattr(TrainingSessionTrainees, key, None)
+        if column is not None:
+            statement = statement.where(column == value)
+    statement = statement.offset(offset).limit(limit)
+    return session.exec(statement).all()
