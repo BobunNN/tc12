@@ -7,7 +7,7 @@ from src.app.dependencies import (
     get_current_active_superuser,
     get_current_user,
 )
-from src.app.schemas.training_sessions import SubstitutionRequests
+from src.app.schemas.substitution_requests import SubstitutionRequests
 from src.app.core.substitutions import substitution_service
 from src.app.schemas.user import User
 

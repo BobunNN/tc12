@@ -6,7 +6,7 @@ from src.app.core.training_sessions.training_session_service import (
     search_training_session,
     search_session_trainees,
 )
-from src.app.schemas.training_sessions import Absences
+from src.app.schemas.absences import Absences
 from src.app.schemas.user import User
 
 from .crud_absences import (

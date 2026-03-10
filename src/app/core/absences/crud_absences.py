@@ -1,6 +1,6 @@
 from datetime import datetime
 from sqlmodel import Session, select
-from src.app.schemas.training_sessions import Absences
+from src.app.schemas.absences import Absences
 
 
 def create_absence(session: Session, absence_create: Absences) -> Absences:
