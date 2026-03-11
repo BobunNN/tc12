@@ -1,102 +1,49 @@
-from typing import Any
-
 from pydantic import EmailStr
-from sqlmodel import Session, select
+from sqlmodel import Session
 
+from src.app.core.crud.crud_base import CRUDBase
 from src.app.core.security import DUMMY_HASH, get_password_hash, verify_password
-from src.app.schemas.user import User, UserCreate
+from src.app.schemas.user import User, UserCreate, UserUpdate
 
 
-def create_user(*, session: Session, user_create: UserCreate) -> User:
+class CRUDUsers(CRUDBase[User, UserCreate, UserUpdate]):
     """
-    Create a new user in the database.
-    Hashes the password before saving.
-    Returns the created User object.
-    """
-    db_obj = User.model_validate(
-        user_create, update={"hashed_password": get_password_hash(user_create.password)}
-    )
-    session.add(db_obj)
-    session.commit()
-    session.refresh(db_obj)
-    return db_obj
+    get_by_id, get_all, get_with_filters, create, update, delete_by_id
+    are all inherited.
 
+    Bespoke methods cover email-based lookup and password authentication,
+    which are domain-specific and don't belong in the generic base.
+    """
 
-def update_user(*, session: Session, db_user: User, user_in: UserCreate) -> Any:
-    """
-    Update an existing user in the database.
-    If a new password is provided, it will be hashed and updated.
-    Returns the updated User object.
-    """
-    user_data = user_in.model_dump(exclude_unset=True)
-    extra_data = {}
-    if "password" in user_data:
-        password = user_data["password"]
-        hashed_password = get_password_hash(password)
-        extra_data["hashed_password"] = hashed_password
-    db_user.sqlmodel_update(user_data, update=extra_data)
-    session.add(db_user)
-    session.commit()
-    session.refresh(db_user)
-    return db_user
+    def get_by_email(self, session: Session, email: str) -> User | None:
+        return self.get_by_composite_key(session, email=email)
 
-
-def get_user_by_email(*, session: Session, email: str) -> User | None:
-    """
-    Retrieve a user from the database by their email address.
-    Returns the User object if found, else None.
-    """
-    statement = select(User).where(User.email == email)
-    session_user = session.exec(statement).first()
-    return session_user
-
-
-def get_user_by_id(*, session: Session, user_id: int) -> User | None:
-    """
-    Retrieve a user from the database by their user ID.
-    Returns the User object if found, else None.
-    """
-    statement = select(User).where(User.id == user_id)
-    session_user = session.exec(statement).first()
-    return session_user
-
-
-def authenticate_user(*, session: Session, email: str, password: str) -> User | None:
-    """
-    Authenticate a user by email and password.
-    Returns the User object if authentication is successful, else False.
-    Updates the password hash if needed.
-    """
-    user = get_user_by_email(session=session, email=email)
-    if not user:
-        verify_password(password, DUMMY_HASH)
-        return False
-    verified, updated_password_hash = verify_password(password, user.hashed_password)
-    if not verified:
-        return False
-    if updated_password_hash:
-        user.hashed_password = updated_password_hash
-        session.add(user)
+    # type: ignore[override]
+    def create(self, session: Session, obj_in: UserCreate) -> User:
+        """Overrides base create to hash the password before persisting."""
+        db_obj = User.model_validate(
+            obj_in, update={"hashed_password": get_password_hash(obj_in.password)}
+        )
+        session.add(db_obj)
         session.commit()
-        session.refresh(user)
-    return user
+        session.refresh(db_obj)
+        return db_obj
 
+    def delete_by_email(self, session: Session, email: EmailStr) -> bool:
+        return self.delete_by_composite_key(session, email=email)
 
-def get_all_users(*, session: Session, offset: int = 0, limit: int = 100) -> list[User]:
-    """
-    Retrieve all users from the database with pagination support.
-    Returns a list of User objects.
-    """
-    statement = select(User).offset(offset).limit(limit)
-    users = session.exec(statement).all()
-    return users
-
-
-def delete_user(*, session: Session, email: EmailStr) -> bool:
-    """
-    Delete a user from the database by their email address.
-    Returns True if deletion is successful.
-    """
-    user = get_user_by_email(session=session, email=email)
-    session.delete(user)
-    session.commit()
+    def authenticate(self, session: Session, email: str, password: str) -> User | None:
+        """Returns the User on success, None on failure."""
+        user = self.get_by_email(session, email)
+        if not user:
+            verify_password(password, DUMMY_HASH)  # constant-time dummy check
+            return None
+        verified, updated_hash = verify_password(password, user.hashed_password)
+        if not verified:
+            return None
+        if updated_hash:
+            user.hashed_password = updated_hash
+            session.add(user)
+            session.commit()
+            session.refresh(user)
+        return user

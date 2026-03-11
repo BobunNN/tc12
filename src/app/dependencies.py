@@ -9,6 +9,8 @@ from sqlmodel import create_engine, Session
 
 from src.app.core.security import ALGORITHM
 from src.app.config import Settings, get_settings
+from src.app.core.users.crud_users import CRUDUsers
+from src.app.core.users.user_service import UserService
 from src.app.schemas.user import TokenPayload, User
 
 
@@ -88,4 +90,12 @@ def get_current_active_superuser(current_user: CurrentUser) -> User:
         )
     return current_user
 
+
 TrainerScope = Annotated[User, Security(get_current_user, scopes=["admin", "trainer"])]
+
+
+def get_user_service() -> UserService:
+    return UserService(crud_users=CRUDUsers(User))
+
+
+UserServiceDep = Annotated[UserService, Depends(get_user_service)]

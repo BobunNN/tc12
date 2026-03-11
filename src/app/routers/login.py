@@ -5,10 +5,10 @@ from fastapi.security import OAuth2PasswordRequestForm
 from datetime import timedelta
 
 
-from src.app.core.users import crud_users
+from src.app.core.users.crud_users import CRUDUsers
 from src.app.core.security import create_access_token
 from src.app.dependencies import SessionDep, SettingsDep
-from src.app.schemas.user import Token
+from src.app.schemas.user import Token, User
 
 
 router = APIRouter(tags=["login"])
@@ -20,7 +20,8 @@ async def login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     settings: SettingsDep,
 ) -> Token:
-    user = crud_users.authenticate_user(
+    crud_users = CRUDUsers(User)
+    user = crud_users.authenticate(
         session=session, email=form_data.username, password=form_data.password
     )
     if not user:

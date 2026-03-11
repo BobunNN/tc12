@@ -3,8 +3,8 @@ from typing import Any
 
 from sqlmodel import Session
 from src.app.core.training_sessions.exceptions import (
-    TraineeIsTrainer,
-    TrainingSessionInvalidTrainer,
+    # TraineeIsTrainer,
+    # TrainingSessionInvalidTrainer,
     TrainingSessionMaxCapacity,
     TrainingSessionNotFound,
     TrainingSessionOverlap,
@@ -21,7 +21,8 @@ from src.app.core.training_sessions.crud_training_sessions import (
     delete_training_session,
     write_trainee_session_assignement,
 )
-from src.app.core.users.user_service import check_is_trainer
+
+# from src.app.core.users.user_service import check_is_trainer
 from src.app.schemas.training_sessions import SessionTraineesLink
 from src.app.schemas.training_sessions import (
     TrainingSessionCreate,
@@ -41,8 +42,8 @@ def create_training_session(
     if check_sessions_overlap(session, session_create):
         raise TrainingSessionOverlap
 
-    if not check_is_trainer(session, session_create.trainer_id):
-        raise TrainingSessionInvalidTrainer
+    # if not check_is_trainer(session, session_create.trainer_id):
+    #     raise TrainingSessionInvalidTrainer
 
     return write_training_session(session, session_create)
 
@@ -137,9 +138,9 @@ def update_training_session(
     if not db_session:
         raise TrainingSessionNotFound
 
-    if session_update.trainer_id:
-        if not check_is_trainer(session=session, id=session_update.trainer_id):
-            raise TrainingSessionInvalidTrainer
+    # if session_update.trainer_id:
+    #     if not check_is_trainer(session=session, id=session_update.trainer_id):
+    #         raise TrainingSessionInvalidTrainer
 
     update_data = db_session.model_dump()
     update_fields = session_update.model_dump(exclude_unset=True)
@@ -195,8 +196,8 @@ def assign_trainee_session(session: Session, trainee_id: int, session_id: int):
     if not session_to_assign:
         raise TrainingSessionNotFound
 
-    if check_is_trainer(session=session, id=trainee_id):
-        raise TraineeIsTrainer
+    # if check_is_trainer(session=session, id=trainee_id):
+    #     raise TraineeIsTrainer
 
     if check_trainee_session_overlap(
         session=session, trainee_id=trainee_id, session_to_assign=session_to_assign
