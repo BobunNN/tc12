@@ -4,7 +4,7 @@ from typing import Literal
 from sqlmodel import AutoString, Field, SQLModel
 
 
-class Absences(SQLModel, table=True):
+class AbsenceBase(SQLModel):
     training_session_id: int = Field(
         primary_key=True, foreign_key="training_sessions.id"
     )
@@ -15,4 +15,15 @@ class Absences(SQLModel, table=True):
     status: Literal["pending", "confirmed"] = Field(
         default="pending", sa_type=AutoString
     )
-    created_at: datetime
+    created_at: datetime = Field(default_factory=datetime.now)
+
+
+class Absences(AbsenceBase, table=True): ...
+
+
+class AbsenceCreate(AbsenceBase):
+    absence_date: datetime | None = None  # Defaults to next upcoming session day
+
+
+class AbsenceUpdate(SQLModel):
+    status: Literal["pending", "confirmed"] | None = None

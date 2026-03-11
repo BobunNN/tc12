@@ -1,6 +1,9 @@
 from fastapi import APIRouter, Depends, Security
 from src.app.dependencies import CurrentUser, SessionDep, get_current_user
-from src.app.schemas.training_sessions import TrainingSessionCreate, TrainingSessionUpdate
+from src.app.schemas.training_sessions import (
+    TrainingSessionCreate,
+    TrainingSessionUpdate,
+)
 from src.app.core.training_sessions import (
     training_session_service,
 )
@@ -16,7 +19,9 @@ def create_training_session(
     session: SessionDep,
     session_create: TrainingSessionCreate,
 ):
-    return training_session_service.create_training_session(session=session, session_create=session_create)
+    return training_session_service.create_training_session(
+        session=session, session_create=session_create
+    )
 
 
 @router.get(
@@ -79,7 +84,14 @@ def delete_training_session(
     return training_session_service.remove_training_session(session, session_id)
 
 
-#TODO move to batch resources
+@router.post("/v1/training-sessions/trainee-assignement")
+def assign_trainee_to_session(session: SessionDep, session_id: int, trainee_id: int):
+    return training_session_service.assign_trainee_session(
+        session=session, trainee_id=trainee_id, session_id=session_id
+    )
+
+
+# TODO move to batch resources
 # @router.post(
 #     "/v1/training-sessions-batch",
 #     dependencies=[Security(get_current_user, scopes=["trainer"])],

@@ -1,10 +1,15 @@
 from datetime import datetime
 from sqlmodel import Session, select
-from src.app.schemas.absences import Absences
+from src.app.schemas.absences import Absences, AbsenceCreate
 
 
-def create_absence(session: Session, absence_create: Absences) -> Absences:
-    db_obj = Absences.model_validate(absence_create)
+def create_absence(session: Session, absence_create: AbsenceCreate) -> Absences:
+    db_obj = Absences(
+        training_session_id=absence_create.training_session_id,
+        trainee_id=absence_create.trainee_id,
+        absence_date=absence_create.absence_date,
+        status=absence_create.status,
+    )
     session.add(db_obj)
     session.commit()
     session.refresh(db_obj)
@@ -17,8 +22,8 @@ def get_unique_absence_by_ckey(
     statement = (
         select(Absences)
         .where(Absences.training_session_id == training_id)
-        .where(trainee_id == trainee_id)
-        .where(training_date == training_date)
+        .where(Absences.trainee_id == trainee_id)
+        .where(Absences.absence_date == training_date)
     )
     return session.exec(statement).first()
 
@@ -30,8 +35,15 @@ def get_all_absences(
     return session.exec(statement).all()
 
 
-def delete_absence(session: Session, absence_id: int) -> bool:
-    db_absence = get_unique_absence_by_ckey(session, absence_id)
+def delete_absence(
+    session: Session, trainee_id: int, training_id: int, training_date: datetime
+) -> bool:
+    db_absence = get_unique_absence_by_ckey(
+        session,
+        trainee_id=trainee_id,
+        training_id=training_id,
+        training_date=training_date,
+    )
     if db_absence:
         session.delete(db_absence)
         session.commit()
@@ -47,16 +59,14 @@ def get_absences_with_filters(
 
     Args:
         session (Session): SQLModel session.
-        filters (dict): Dictionary of filters where keys are column names of SubstitutionRequests and values are the values to filter by.
-            Example: {"user_id": 123, "status": "pending"}
+        filters (dict): Dictionary of filters where keys are column names of Absences
+            and values are the values to filter by.
+            Example: {"trainee_id": 123, "status": "pending"}
         offset (int): Pagination offset.
         limit (int): Pagination limit.
 
     Returns:
-        list[SubstitutionRequests]: List of filtered substitution requests.
-
-    Note:
-        Only exact matches are supported. Keys must correspond to valid SubstitutionRequests attributes.
+        list[Absences]: List of filtered absences.
     """
     statement = select(Absences)
     for key, value in filters.items():

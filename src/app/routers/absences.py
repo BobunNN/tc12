@@ -1,64 +1,57 @@
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from src.app.dependencies import (
     CurrentUser,
     SessionDep,
     get_current_active_superuser,
-    get_current_user,
 )
-from src.app.schemas.absences import Absences
+from src.app.schemas.absences import AbsenceCreate
 from src.app.core.absences.absence_service import (
-    create_absence_service,
+    open_absence_slot,
     get_all_absences_service,
     delete_absence_service,
     search_unique_absence,
+    get_self_absences,
 )
 
 router = APIRouter(tags=["absences"])
 
 
 @router.post("/v1/absences")
-def create_absence(session: SessionDep, absence: Absences, current_user: CurrentUser):
-    return create_absence_service(session, absence, current_user)
+def create_absence(
+    session: SessionDep, absence: AbsenceCreate, current_user: CurrentUser
+):
+    return open_absence_slot(session, absence, current_user)
 
 
-@router.get(
-    "/v1/absences/me",
-)
-def get_self_absences(
+@router.get("/v1/absences/me")
+def get_my_absences(
     session: SessionDep,
-    absence_id: int,
     current_user: CurrentUser,
 ):
     """
-    If current user is trainee, returns his own absences, if current user is trainer returns
-    the absences of the training session he is managing
-
-    Args:
-        session (SessionDep): _description_
-        absence_id (int): _description_
-        current_user (CurrentUser): _description_
+    If current user is a trainee, returns their own absences.
+    If current user is a trainer, returns absences for all sessions they manage.
     """
-    ...  # TODO
+    return get_self_absences(session, current_user)
 
 
 @router.get(
-    "/v1/absences/{training_id}/{traineed_id}/{absence_date}",
+    "/v1/absences/{training_id}/{trainee_id}/{absence_date}",
     dependencies=[Depends(get_current_active_superuser)],
 )
 def get_absence(
     session: SessionDep,
-    absence_id: int,
-    trainee_id: int,
     training_id: int,
-    training_date: datetime,
+    trainee_id: int,
+    absence_date: datetime,
 ):
     return search_unique_absence(
         session,
         trainee_id=trainee_id,
         training_id=training_id,
-        training_date=training_date,
+        training_date=absence_date,
     )
 
 
@@ -67,9 +60,23 @@ def get_all_absences(session: SessionDep):
     return get_all_absences_service(session)
 
 
-@router.delete("/v1/absences/{absence_id}", dependencies=[Depends(get_current_user)])
-def delete_absence(session: SessionDep, absence_id: int):
-    success = delete_absence_service(session, absence_id)
-    if not success:
-        raise HTTPException(status_code=404, detail="Absence not found")
+@router.delete("/v1/absences/{training_id}/{trainee_id}/{absence_date}")
+def delete_absence(
+    session: SessionDep,
+    training_id: int,
+    trainee_id: int,
+    absence_date: datetime,
+    current_user: CurrentUser,
+):
+    """
+    Deletes an absence. The current user must be the trainee who owns the absence
+    or a superuser.
+    """
+    delete_absence_service(
+        session,
+        trainee_id=trainee_id,
+        training_id=training_id,
+        training_date=absence_date,
+        current_user=current_user,
+    )
     return {"detail": "Deleted successfully"}
