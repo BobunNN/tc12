@@ -4,6 +4,7 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from src.app.schemas.user import User  # noqa
 from src.app.schemas.training_sessions import TrainingSessions  # noqa
+from src.app.schemas.absences import Absences  # noqa
 from alembic import context
 from sqlmodel import SQLModel
 

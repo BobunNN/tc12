@@ -1,12 +1,10 @@
 from fastapi import APIRouter
 
-from fastapi import APIRouter, Depends
-
 from src.app.core.training_sessions import training_session_service
-from src.app.dependencies import CurrentUser, SessionDep, get_current_active_superuser
+from src.app.dependencies import SessionDep
 from src.app.core.users import user_service
 
-from src.app.schemas.training_sessions import TrainingSessions
+from src.app.schemas.training_sessions import TrainingSessionCreate
 from src.app.schemas.user import (
     UserCreate,
 )
@@ -44,8 +42,7 @@ users = [
 ]
 
 sessions = [
-    TrainingSessions(
-        id=0,
+    TrainingSessionCreate(
         day=1,
         trainer_id=1,
         session_start=time(10),
@@ -53,8 +50,7 @@ sessions = [
         location="Carnot",
         court_number=1,
     ),
-    TrainingSessions(
-        id=1,
+    TrainingSessionCreate(
         day=1,
         trainer_id=1,
         session_start=time(13),
@@ -62,8 +58,7 @@ sessions = [
         location="Carnot",
         court_number=2,
     ),
-    TrainingSessions(
-        id=2,
+    TrainingSessionCreate(
         day=1,
         trainer_id=5,
         session_start=time(10),
@@ -71,8 +66,7 @@ sessions = [
         location="Leo Lagrange",
         court_number=1,
     ),
-    TrainingSessions(
-        id=3,
+    TrainingSessionCreate(
         day=2,
         trainer_id=5,
         session_start=time(10),
@@ -104,6 +98,6 @@ def init_training_sessions(
 def init_trainees(
     session: SessionDep,
 ):
-    sessions_trainees = [(2, 0), (3, 1), (2, 3)]
+    sessions_trainees = [(2, 1), (3, 1), (2, 4)]
     for se in sessions_trainees:
         training_session_service.assign_trainee_session(session, se[0], se[1])

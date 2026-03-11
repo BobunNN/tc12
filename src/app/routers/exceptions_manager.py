@@ -10,6 +10,7 @@ from src.app.core.users.exceptions import (
 from src.app.core.absences.exceptions import (
     AbsenceNotFound,
     AbsenceDateMismatchSessionDay,
+    AbsenceTraineeIdMismatch,
     TrainerDoesNotManageTrainingSession,
     AbsenceAlreadyExists,
     TraineeNotRegisteredForSession,
@@ -46,6 +47,9 @@ def register_exception_handlers(app: FastAPI):
     app.add_exception_handler(AbsenceAlreadyExists, handle_absence_already_exists)
     app.add_exception_handler(
         TraineeNotRegisteredForSession, handle_trainee_not_registered_for_session
+    )
+    app.add_exception_handler(
+        AbsenceTraineeIdMismatch, handle_absence_trainee_id_mismatch
     )
 
     # Training sessions
@@ -140,6 +144,15 @@ async def handle_trainee_not_registered_for_session(
     raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
         detail="Trainee not registered for this session",
+    )
+
+
+async def handle_absence_trainee_id_mismatch(
+    request: Request, exc: AbsenceTraineeIdMismatch
+):
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="Trainee ID mismatch",
     )
 
 
