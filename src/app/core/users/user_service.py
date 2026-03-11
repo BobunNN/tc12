@@ -66,7 +66,7 @@ class UserService:
         user = self.crud_users.get_by_email(session=session, email=user_create.email)
         if user:
             raise UserAlreadyExists
-        user = self.crud_users.create(session=session, user_create=user_create)
+        user = self.crud_users.create(session=session, obj_in=user_create)
         return user
 
     def patch_user(
@@ -98,7 +98,7 @@ class UserService:
         if user:
             raise UserAlreadyExists
         user_create = UserCreate.model_validate(user_in)
-        user = self.crud_users.create(session=session, user_create=user_create)
+        user = self.crud_users.create(session=session, obj_in=user_create)
         return user
 
     def check_is_trainer(self, session: Session, id: int) -> bool:
