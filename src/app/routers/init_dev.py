@@ -1,8 +1,11 @@
 from fastapi import APIRouter
 
-from src.app.core.training_sessions import training_session_service
-from src.app.dependencies import SessionDep
-from src.app.core.users import user_service
+from src.app.dependencies import (
+    SessionDep,
+    SessionTraineeLinkServiceDep,
+    TrainingSessionServiceDep,
+    UserServiceDep,
+)
 
 from src.app.schemas.training_sessions import TrainingSessionCreate
 from src.app.schemas.user import (
@@ -80,6 +83,7 @@ sessions = [
 @router.get("/init-test-users", tags=["test"])
 def init_test_users(
     session: SessionDep,
+    user_service: UserServiceDep,
 ):
     for user_create in users:
         user_service.create_user(session=session, user_create=user_create)
@@ -87,17 +91,18 @@ def init_test_users(
 
 @router.get("/init-training-session", tags=["test"])
 def init_training_sessions(
-    session: SessionDep,
+    session: SessionDep, training_session_service: TrainingSessionServiceDep
 ):
 
     for se in sessions:
         training_session_service.create_training_session(session, se)
 
 
-@router.get("/init-trainees", tags=["test"])
+@router.get("/init-trainees-assignement", tags=["test"])
 def init_trainees(
     session: SessionDep,
+    session_assignement_service: SessionTraineeLinkServiceDep,
 ):
     sessions_trainees = [(2, 1), (3, 1), (2, 4)]
     for se in sessions_trainees:
-        training_session_service.assign_trainee_session(session, se[0], se[1])
+        session_assignement_service.create_session_trainees_link(session, se[0], se[1])

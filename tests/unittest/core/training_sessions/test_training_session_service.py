@@ -15,10 +15,10 @@ from src.app.core.training_sessions.training_session_service import (
     TrainingSessionService,
 )
 from src.app.core.users.crud_users import CRUDUsers
-from src.app.core.session_trainees_link.crud_session_trainees import (
+from src.app.core.session_trainees_assignement.crud_session_trainees import (
     CRUDSessionTraineeAssignment,
 )
-from src.app.core.session_trainees_link.session_trainee_assignement_service import (
+from src.app.core.session_trainees_assignement.session_trainee_assignement_service import (
     SessionTraineeAssignementService,
 )
 from src.app.schemas.training_sessions import SessionTraineeAssignement

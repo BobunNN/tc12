@@ -11,7 +11,6 @@ from src.app.core.training_sessions.exceptions import (
 from src.app.core.training_sessions.crud_training_sessions import CRUDTrainingSessions
 from src.app.core.users.user_service import UserService
 from src.app.schemas.training_sessions import (
-    SessionTraineeAssignement,
     TrainingSessionCreate,
     TrainingSessionUpdate,
     TrainingSessions,
@@ -142,14 +141,6 @@ class TrainingSessionService:
     ) -> list[TrainingSessions]:
         return self.crud_training_sessions.get_with_filters(
             session=session, filters=filters
-        )
-
-    def search_session_trainees(
-        self, session: Session, session_id: int
-    ) -> list[SessionTraineeAssignement]:
-        search_filter = {"training_session_id": session_id}
-        return self.crud_training_sessions.get_with_filters(
-            session=session, filters=search_filter
         )
 
     def bulk_load_training_sessions(self, session: Session, records: list[dict]) -> Any:
