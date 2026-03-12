@@ -83,12 +83,13 @@ class User(UserBase, UserTennisInfo, table=True):
 
 class UserUpdate(UserBase, UserTennisInfo):
     email: EmailStr | None = Field(default=None, max_length=255)  # type: ignore
-    password: str | None = Field(default=None, min_length=8, max_length=128)
+    first_name: str | None = Field(default=None, max_length=30)
+    last_name: str | None = Field(default=None, max_length=30)
 
 
 class UserUpdateMe(UserTennisInfo):
-    first_name: str = Field(max_length=30)
-    last_name: str = Field(max_length=30)
+    first_name: str | None = Field(default=None, max_length=30)
+    last_name: str | None = Field(default=None, max_length=30)
     email: EmailStr | None = Field(default=None, max_length=255)
 
 

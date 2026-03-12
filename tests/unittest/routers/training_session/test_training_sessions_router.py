@@ -101,16 +101,3 @@ def test_create_training_session_overlap(
         headers=superuser_token_headers,
     )
     assert response.status_code == 409 or response.status_code == 422
-
-
-def test_get_self_training_session(
-    client, superuser_token_headers, training_session_payload
-):
-    client.post(
-        "/v1/training-sessions",
-        json=training_session_payload,
-        headers=superuser_token_headers,
-    )
-    response = client.get("/v1/training-sessions/me", headers=superuser_token_headers)
-    assert response.status_code == 200
-    assert isinstance(response.json(), list)

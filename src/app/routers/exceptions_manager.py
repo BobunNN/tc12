@@ -6,6 +6,8 @@ from src.app.core.users.exceptions import (
     UserNotFound,
     SuperUserSelfDeleteForbidden,
     SelfDeleteNotAllowedHere,
+    IncorrectPassword,
+    NewPasswordCannotBeTheSameAsTheCurrentOne,
 )
 from src.app.core.absences.exceptions import (
     AbsenceNotFound,
@@ -34,7 +36,11 @@ def register_exception_handlers(app: FastAPI):
         SuperUserSelfDeleteForbidden, handle_super_user_self_delete
     )
     app.add_exception_handler(SelfDeleteNotAllowedHere, handle_self_delete_not_allowed)
-
+    app.add_exception_handler(IncorrectPassword, handle_incorrect_password)
+    app.add_exception_handler(
+        NewPasswordCannotBeTheSameAsTheCurrentOne,
+        handle_new_password_cannot_be_the_same_as_the_current_one,
+    )
     # Absences
     app.add_exception_handler(AbsenceNotFound, handle_absence_not_found)
     app.add_exception_handler(
@@ -103,6 +109,22 @@ async def handle_self_delete_not_allowed(
     raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
         detail="To delete your own account, use the endpoint DELETE /v1/users/me",
+    )
+
+
+async def handle_incorrect_password(request: Request, exc: IncorrectPassword):
+    raise HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail="Incorrect password",
+    )
+
+
+async def handle_new_password_cannot_be_the_same_as_the_current_one(
+    request: Request, exc: NewPasswordCannotBeTheSameAsTheCurrentOne
+):
+    raise HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail="New password cannot be the same as the current one",
     )
 
 

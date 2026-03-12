@@ -1,262 +1,170 @@
-from datetime import datetime, time, timedelta
 from typing import Any
 
 from sqlmodel import Session
+
 from src.app.core.training_sessions.exceptions import (
-    TraineeIsTrainer,
     TrainingSessionInvalidTrainer,
-    TrainingSessionMaxCapacity,
     TrainingSessionNotFound,
     TrainingSessionOverlap,
-    TraineesHasOverlappingSessions,
 )
 
-from src.app.core.training_sessions.crud_training_sessions import (
-    get_all_training_sessions,
-    get_session_trainees_with_filters,
-    get_training_session_by_id,
-    get_training_sessions_with_filters,
-    write_training_session,
-    patch_training_session,
-    delete_training_session,
-    write_trainee_session_assignement,
-)
-from src.app.core.users.user_service import check_is_trainer
-from src.app.schemas.training_sessions import SessionTraineesLink
+from src.app.core.training_sessions.crud_training_sessions import CRUDTrainingSessions
+from src.app.core.users.user_service import UserService
 from src.app.schemas.training_sessions import (
+    SessionTraineeAssignement,
     TrainingSessionCreate,
-    TrainingSessions,
     TrainingSessionUpdate,
+    TrainingSessions,
 )
-from src.app.schemas.user import User
-
 
 TRAINING_SESSION_MAX_CAPACITY = 4
 
 
-def create_training_session(
-    session: Session, session_create: TrainingSessionCreate
-) -> TrainingSessions:
+class TrainingSessionService:
+    def __init__(
+        self,
+        crud_training_sessions: CRUDTrainingSessions,
+        user_service: UserService,
+    ) -> None:
+        self.crud_training_sessions = crud_training_sessions
+        self.user_service = user_service
 
-    if check_sessions_overlap(session, session_create):
-        raise TrainingSessionOverlap
+    def create_training_session(
+        self, session: Session, session_create: TrainingSessionCreate
+    ) -> TrainingSessions:
 
-    if not check_is_trainer(session, session_create.trainer_id):
-        raise TrainingSessionInvalidTrainer
+        if self.check_sessions_overlap(session, session_create):
+            raise TrainingSessionOverlap
 
-    return write_training_session(session, session_create)
-
-
-def check_sessions_overlap(
-    session: Session,
-    session_create: TrainingSessionCreate,
-) -> bool:
-    """
-    Checks is the training session passed is overlapping with existing training session, which includes time, location and court number
-
-    Args:
-        session (Session): _description_
-        training_session (TrainingSessions): _description_
-
-    Returns:
-        bool: _description_
-    """
-    filters = {
-        "location": session_create.location,
-        "court_number": session_create.court_number,
-        "day": session_create.day,
-    }
-
-    potential_overlaps: list[TrainingSessions] = get_training_sessions_with_filters(
-        session, filters
-    )
-
-    if isinstance(session_create.session_start, str):
-        new_start = datetime.strptime(session_create.session_start, "%H:%M:%S").time()
-    elif isinstance(session_create.session_start, time):
-        new_start = session_create.session_start
-
-    new_end = (
-        datetime.combine(datetime.today(), new_start)
-        + timedelta(minutes=session_create.session_duration)
-    ).time()
-
-    for s in potential_overlaps:
-        existing_start = s.session_start
-        existing_end = (
-            datetime.combine(datetime.today(), existing_start)
-            + timedelta(minutes=s.session_duration)
-        ).time()
-        if new_start < existing_end and new_end > existing_start:
-            return True
-
-    return False
-
-
-def get_training_session(session: Session, session_id: int) -> TrainingSessions:
-    session_obj = get_training_session_by_id(session, session_id)
-    if not session_obj:
-        raise TrainingSessionNotFound
-    return session_obj
-
-
-def get_self_training_session(session: Session, user: User) -> list[TrainingSessions]:
-    if user.is_trainer:
-        search_filters = {"trainer_id": user.id}
-        return get_training_sessions_with_filters(
-            session=session, filters=search_filters
-        )
-    else:
-        trainees_search_filter = {"trainee_id": user.id}
-        user_sessions: list[SessionTraineesLink] = get_session_trainees_with_filters(
-            session=session, filters=trainees_search_filter
-        )
-        sessions = []
-        for user_session in user_sessions:
-            training_session_search_filters = {"id": user_session.training_session_id}
-            sessions.extend(
-                get_training_sessions_with_filters(
-                    session=session, filters=training_session_search_filters
-                )
-            )
-
-        return sessions
-
-
-def get_all_training_session(session: Session) -> list[TrainingSessions]:
-    sessions = get_all_training_sessions(session=session)
-    return sessions
-
-
-def update_training_session(
-    session: Session,
-    session_id: int,
-    session_update: TrainingSessionUpdate,
-) -> TrainingSessions:
-    db_session = get_training_session_by_id(session, session_id)
-    if not db_session:
-        raise TrainingSessionNotFound
-
-    if session_update.trainer_id:
-        if not check_is_trainer(session=session, id=session_update.trainer_id):
+        if not self.user_service.check_is_trainer(session, session_create.trainer_id):
             raise TrainingSessionInvalidTrainer
 
-    update_data = db_session.model_dump()
-    update_fields = session_update.model_dump(exclude_unset=True)
-    update_data.update(update_fields)
-    merged_session = TrainingSessions(**update_data)
-
-    if check_sessions_overlap(session, merged_session):
-        raise TrainingSessionOverlap
-
-    return patch_training_session(session, db_session, session_update)
-
-
-def remove_training_session(
-    session: Session,
-    session_id: int,
-) -> Any:
-    success = delete_training_session(session, session_id)
-    if not success:
-        raise TrainingSessionNotFound
-    return {"detail": "Deleted successfully"}
-
-
-def search_training_session(session: Session, session_id: int) -> TrainingSessions:
-    search_filter = {"id": session_id}
-    return get_training_sessions_with_filters(session=session, filters=search_filter)
-
-
-def search_session_trainees(
-    session: Session, session_id: int
-) -> list[SessionTraineesLink]:
-    search_filter = {"training_session_id": session_id}
-    return get_session_trainees_with_filters(session=session, filters=search_filter)
-
-
-def bulk_load_training_sessions(session: Session, records: list[dict]) -> Any:
-    loaded = []
-    errors = []
-    for record in records:
-        try:
-            session_obj = TrainingSessions.model_validate(record)
-            existing = get_training_session_by_id(session, session_obj.id)
-            if existing:
-                continue
-            create_training_session(session, session_obj)
-            loaded.append(session_obj)
-        except Exception as e:
-            errors.append({"record": record, "error": str(e)})
-    return {"loaded_count": len(loaded), "errors": errors}
-
-
-def assign_trainee_session(session: Session, trainee_id: int, session_id: int):
-    session_to_assign = get_training_session_by_id(session, session_id)
-    if not session_to_assign:
-        raise TrainingSessionNotFound
-
-    if check_is_trainer(session=session, id=trainee_id):
-        raise TraineeIsTrainer
-
-    if check_trainee_session_overlap(
-        session=session, trainee_id=trainee_id, session_to_assign=session_to_assign
-    ):
-        raise TraineesHasOverlappingSessions
-
-    trainees = get_session_trainees_with_filters(
-        session, filters={"training_session_id": session_id}
-    )
-    if len(trainees) == TRAINING_SESSION_MAX_CAPACITY:
-        raise TrainingSessionMaxCapacity
-
-    return write_trainee_session_assignement(
-        session,
-        SessionTraineesLink(training_session_id=session_id, trainee_id=trainee_id),
-    )
-
-
-def check_trainee_session_overlap(
-    session: Session, trainee_id: int, session_to_assign: TrainingSessions
-):
-    """
-    Checks is trainees has any overlapping training session e.g. session occuring at the same time
-
-    Args:
-        session (Session): _description_
-        trainee_id (int): _description_
-        session_to_assign (TrainingSessions): _description_
-
-    Returns:
-        _type_: _description_
-    """
-    trainee_sessions = get_session_trainees_with_filters(
-        session, {"trainee_id": trainee_id}
-    )
-    if isinstance(session_to_assign.session_start, str):
-        new_start = datetime.strptime(
-            session_to_assign.session_start, "%H:%M:%S"
-        ).time()
-    else:
-        new_start = session_to_assign.session_start
-    new_end = (
-        datetime.combine(datetime.today(), new_start)
-        + timedelta(minutes=session_to_assign.session_duration)
-    ).time()
-
-    for trainee_session in trainee_sessions:
-        existing_session = get_training_session_by_id(
-            session, trainee_session.training_session_id
+        return self.crud_training_sessions.create(
+            session=session, obj_in=session_create
         )
-        if not existing_session:
-            continue
 
-        if existing_session.day == session_to_assign.day:
-            existing_start = existing_session.session_start
-            existing_end = (
-                datetime.combine(datetime.today(), existing_start)
-                + timedelta(minutes=existing_session.session_duration)
-            ).time()
-            if new_start < existing_end and new_end > existing_start:
+    def check_sessions_overlap(
+        self,
+        session: Session,
+        session_create: TrainingSessionCreate,
+    ) -> bool:
+        """
+        Checks is the training session passed is overlapping with existing training session, which includes time, location and court number
+
+        Args:
+            session (Session): _description_
+            training_session (TrainingSessions): _description_
+
+        Returns:
+            bool: _description_
+        """
+        filters = {
+            "location": session_create.location,
+            "court_number": session_create.court_number,
+            "day": session_create.day,
+        }
+
+        potential_overlaps: list[TrainingSessions] = (
+            self.crud_training_sessions.get_with_filters(
+                session=session, filters=filters
+            )
+        )
+
+        for s in potential_overlaps:
+            if s.overlaps_with(session_create):
                 return True
 
-    return False
+        return False
+
+    def get_training_session(
+        self, session: Session, session_id: int
+    ) -> TrainingSessions:
+        training_session = self.crud_training_sessions.get_by_id(
+            session=session, record_id=session_id
+        )
+        if not training_session:
+            raise TrainingSessionNotFound
+        return training_session
+
+    def get_all_training_session(
+        self, session: Session, offset: int, limit: int
+    ) -> list[TrainingSessions]:
+        sessions = self.crud_training_sessions.get_all(
+            session=session, offset=offset, limit=limit
+        )
+        return sessions
+
+    def update_training_session(
+        self,
+        session: Session,
+        session_id: int,
+        session_update: TrainingSessionUpdate,
+    ) -> TrainingSessions:
+        training_session = self.crud_training_sessions.get_by_id(
+            session=session, record_id=session_id
+        )
+
+        if not training_session:
+            raise TrainingSessionNotFound
+
+        if session_update.trainer_id:
+            if not self.user_service.check_is_trainer(
+                session=session, id=session_update.trainer_id
+            ):
+                raise TrainingSessionInvalidTrainer
+
+        update_data = training_session.model_dump()
+        update_fields = session_update.model_dump(exclude_unset=True)
+        update_data.update(update_fields)
+        merged_session = TrainingSessions(**update_data)
+
+        if self.check_sessions_overlap(session, merged_session):
+            raise TrainingSessionOverlap
+
+        return self.crud_training_sessions.update(
+            session=session, db_obj=training_session, obj_in=session_update
+        )
+
+    def remove_training_session(
+        self,
+        session: Session,
+        session_id: int,
+    ) -> Any:
+        success = self.crud_training_sessions.delete_by_id(
+            session=session, record_id=session_id
+        )
+        if not success:
+            raise TrainingSessionNotFound
+        return {"detail": "Deleted successfully"}
+
+    def search_training_session(
+        self, session: Session, filters: dict
+    ) -> list[TrainingSessions]:
+        return self.crud_training_sessions.get_with_filters(
+            session=session, filters=filters
+        )
+
+    def search_session_trainees(
+        self, session: Session, session_id: int
+    ) -> list[SessionTraineeAssignement]:
+        search_filter = {"training_session_id": session_id}
+        return self.crud_training_sessions.get_with_filters(
+            session=session, filters=search_filter
+        )
+
+    def bulk_load_training_sessions(self, session: Session, records: list[dict]) -> Any:
+        loaded = []
+        errors = []
+        for record in records:
+            try:
+                session_obj = TrainingSessions.model_validate(record)
+                existing = self.crud_training_sessions.get_by_id(
+                    session=session, record_id=session_obj.id
+                )
+                if existing:
+                    continue
+                self.create_training_session(session, session_obj)
+                loaded.append(session_obj)
+            except Exception as e:
+                errors.append({"record": record, "error": str(e)})
+        return {"loaded_count": len(loaded), "errors": errors}

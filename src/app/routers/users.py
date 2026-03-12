@@ -3,8 +3,12 @@ from typing import Any
 from fastapi import APIRouter, Depends
 from pydantic import EmailStr
 
-from src.app.dependencies import CurrentUser, SessionDep, get_current_active_superuser
-from src.app.core.users import user_service
+from src.app.dependencies import (
+    CurrentUser,
+    SessionDep,
+    UserServiceDep,
+    get_current_active_superuser,
+)
 
 from src.app.schemas.user import (
     UpdatePassword,
@@ -21,6 +25,7 @@ router = APIRouter(tags=["users"])
 @router.get("/v1/users", dependencies=[Depends(get_current_active_superuser)])
 async def read_users(
     session: SessionDep,
+    user_service: UserServiceDep,
     limit: int = 100,
     offset: int = 0,
 ):
@@ -41,7 +46,11 @@ def read_user_me(current_user: CurrentUser) -> Any:
 
 
 @router.get("/v1/users/{email}", dependencies=[Depends(get_current_active_superuser)])
-def fetch_user(session: SessionDep, email: EmailStr):
+def fetch_user(
+    session: SessionDep,
+    email: EmailStr,
+    user_service: UserServiceDep,
+):
     """
     Retrieve a user by email. Requires superuser privileges.
     """
@@ -49,7 +58,11 @@ def fetch_user(session: SessionDep, email: EmailStr):
 
 
 @router.post("/v1/users", dependencies=[Depends(get_current_active_superuser)])
-def create_user(session: SessionDep, user_create: UserCreate):
+def create_user(
+    session: SessionDep,
+    user_create: UserCreate,
+    user_service: UserServiceDep,
+):
     """
     Create a new user. Requires superuser privileges.
     """
@@ -58,7 +71,11 @@ def create_user(session: SessionDep, user_create: UserCreate):
 
 @router.patch("/v1/users/me")
 def update_user_me(
-    *, session: SessionDep, user_in: UserUpdateMe, current_user: CurrentUser
+    *,
+    session: SessionDep,
+    user_in: UserUpdateMe,
+    current_user: CurrentUser,
+    user_service: UserServiceDep,
 ) -> Any:
     """
     Update own user.
@@ -69,7 +86,12 @@ def update_user_me(
 
 
 @router.patch("/v1/users/{email}", dependencies=[Depends(get_current_active_superuser)])
-def patch_user(session: SessionDep, user_patch: UserUpdate, email: EmailStr):
+def patch_user(
+    session: SessionDep,
+    user_patch: UserUpdate,
+    email: EmailStr,
+    user_service: UserServiceDep,
+):
     """
     Update a user by email. Requires superuser privileges.
     """
@@ -79,7 +101,11 @@ def patch_user(session: SessionDep, user_patch: UserUpdate, email: EmailStr):
 @router.delete(
     "/v1/users/me",
 )
-def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
+def delete_user_me(
+    session: SessionDep,
+    current_user: CurrentUser,
+    user_service: UserServiceDep,
+) -> Any:
     """
     Delete own user.
     """
@@ -90,7 +116,12 @@ def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
 @router.delete(
     "/v1/users/{email}", dependencies=[Depends(get_current_active_superuser)]
 )
-def delete_user(session: SessionDep, email: EmailStr, current_user: CurrentUser):
+def delete_user(
+    session: SessionDep,
+    email: EmailStr,
+    current_user: CurrentUser,
+    user_service: UserServiceDep,
+):
     """
     Delete a user by email. Requires superuser privileges.
     """
@@ -101,7 +132,11 @@ def delete_user(session: SessionDep, email: EmailStr, current_user: CurrentUser)
 
 @router.patch("/v1/users/me/password")
 def update_password_me(
-    *, session: SessionDep, body: UpdatePassword, current_user: CurrentUser
+    *,
+    session: SessionDep,
+    body: UpdatePassword,
+    current_user: CurrentUser,
+    user_service: UserServiceDep,
 ) -> Any:
     """
     Update own password.
@@ -115,7 +150,11 @@ def update_password_me(
 @router.post(
     "/v1/users/signup",
 )
-def register_user(session: SessionDep, user_in: UserRegister) -> Any:
+def register_user(
+    session: SessionDep,
+    user_in: UserRegister,
+    user_service: UserServiceDep,
+) -> Any:
     """
     Create new user without the need to be logged in.
     """
