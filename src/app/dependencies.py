@@ -5,14 +5,15 @@ from fastapi.security import OAuth2PasswordBearer, SecurityScopes
 import jwt
 from jwt import InvalidTokenError
 from pydantic import ValidationError
+from sqlalchemy import NullPool
 from sqlmodel import create_engine, Session
 
 from src.app.core.security import ALGORITHM
 from src.app.config import Settings, get_settings
-from src.app.core.session_trainees_link.crud_session_trainees import (
+from src.app.core.session_trainees_assignement.crud_session_trainees import (
     CRUDSessionTraineeAssignment,
 )
-from src.app.core.session_trainees_link.session_trainee_assignement_service import (
+from src.app.core.session_trainees_assignement.session_trainee_assignement_service import (
     SessionTraineeAssignementService,
 )
 from src.app.core.users.crud_users import CRUDUsers
@@ -34,7 +35,7 @@ from src.app.schemas.absences import Absences
 sqlite_file_name = "app.db"
 sqlite_url = f"sqlite:///{sqlite_file_name}"
 
-engine = create_engine(sqlite_url, echo=False)
+engine = create_engine(sqlite_url, echo=False, poolclass=NullPool)
 
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="/v1/login/token",
@@ -132,7 +133,7 @@ def get_absence_service() -> AbsenceService:
 
 def get_session_trainee_assignement_service() -> SessionTraineeAssignementService:
     return SessionTraineeAssignementService(
-        crud_session_trainee_assignment=CRUDSessionTraineeAssignment(
+        crud_session_trainees_link=CRUDSessionTraineeAssignment(
             SessionTraineeAssignement
         ),
         training_session_service=get_training_session_service(),

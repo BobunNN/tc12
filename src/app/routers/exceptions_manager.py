@@ -25,6 +25,9 @@ from src.app.core.training_sessions.exceptions import (
     TraineesHasOverlappingSessions,
     TrainingSessionMaxCapacity,
 )
+from src.app.core.session_trainees_assignement.exceptions import (
+    SessionTraineeAssignementAlreadyExists,
+)
 
 
 def register_exception_handlers(app: FastAPI):
@@ -71,6 +74,11 @@ def register_exception_handlers(app: FastAPI):
         TraineesHasOverlappingSessions, handle_trainee_has_overlapping_sessions
     )
     app.add_exception_handler(TrainingSessionMaxCapacity, handle_session_max_capacity)
+
+    # Training assignement
+    app.add_exception_handler(
+        SessionTraineeAssignementAlreadyExists, handle_assignement_already_exists
+    )
 
 
 async def validation_exception_handler(request, exc: ValidationError):
@@ -225,4 +233,13 @@ async def handle_session_max_capacity(
     raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
         detail="Trainee session max capacity reached",
+    )
+
+
+async def handle_assignement_already_exists(
+    request: Request, exc: SessionTraineeAssignementAlreadyExists
+):
+    raise HTTPException(
+        status_code=status.HTTP_409_CONFLICT,
+        detail="Assignement already exists",
     )

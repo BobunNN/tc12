@@ -9,6 +9,7 @@ from src.app.routers import (
     exceptions_manager,
     absences,
     init_dev,
+    session_trainee_assignement,
 )
 
 # Basic logging configuration
@@ -33,7 +34,7 @@ app.include_router(substitutions.router)
 app.include_router(training_sessions.router)
 app.include_router(absences.router)
 app.include_router(init_dev.router)
-
+app.include_router(session_trainee_assignement.router)
 
 
 @app.get(

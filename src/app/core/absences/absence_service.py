@@ -9,7 +9,7 @@ from src.app.core.absences.exceptions import (
     TraineeNotRegisteredForSession,
     TrainerDoesNotManageTrainingSession,
 )
-from src.app.core.session_trainees_link.session_trainee_assignement_service import (
+from src.app.core.session_trainees_assignement.session_trainee_assignement_service import (
     SessionTraineeAssignementService,
 )
 from src.app.schemas.training_sessions import (
