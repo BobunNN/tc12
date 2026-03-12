@@ -1,12 +1,16 @@
 from fastapi import APIRouter, Depends, Security
-from src.app.dependencies import CurrentUser, SessionDep, get_current_user
+from src.app.dependencies import (
+    CurrentUser,
+    SessionDep,
+    SessionTraineeLinkServiceDep,
+    TrainingSessionServiceDep,
+    get_current_user,
+)
 from src.app.schemas.training_sessions import (
     TrainingSessionCreate,
     TrainingSessionUpdate,
 )
-from src.app.core.training_sessions import (
-    training_session_service,
-)
+
 
 router = APIRouter(tags=["training_sessions"])
 
@@ -18,6 +22,7 @@ router = APIRouter(tags=["training_sessions"])
 def create_training_session(
     session: SessionDep,
     session_create: TrainingSessionCreate,
+    training_session_service: TrainingSessionServiceDep,
 ):
     return training_session_service.create_training_session(
         session=session, session_create=session_create
@@ -30,6 +35,7 @@ def create_training_session(
 def get_session_trainee(
     session: SessionDep,
     session_id: int,
+    training_session_service: TrainingSessionServiceDep,
 ):
     return training_session_service.search_session_trainees(session, session_id)
 
@@ -38,6 +44,7 @@ def get_session_trainee(
 def get_self_training_session(
     session: SessionDep,
     current_user: CurrentUser,
+    training_session_service: TrainingSessionServiceDep,
 ):
     return training_session_service.get_self_training_session(
         session=session, user=current_user
@@ -50,13 +57,19 @@ def get_self_training_session(
 def get_training_session(
     session: SessionDep,
     session_id: int,
+    training_session_service: TrainingSessionServiceDep,
 ):
     return training_session_service.get_training_session(session, session_id)
 
 
 @router.get("/v1/training-sessions", dependencies=[Depends(get_current_user)])
-def get_all_training_sessions(session: SessionDep, offset: int = 0, limit: int = 100):
-    return training_session_service.get_all_training_sessions(session, offset, limit)
+def get_all_training_sessions(
+    session: SessionDep,
+    training_session_service: TrainingSessionServiceDep,
+    offset: int = 0,
+    limit: int = 100,
+):
+    return training_session_service.get_all_training_session(session, offset, limit)
 
 
 @router.patch(
@@ -67,6 +80,7 @@ def update_training_session(
     session: SessionDep,
     session_id: int,
     session_update: TrainingSessionUpdate,
+    training_session_service: TrainingSessionServiceDep,
 ):
     return training_session_service.update_training_session(
         session=session, session_id=session_id, session_update=session_update
@@ -80,13 +94,19 @@ def update_training_session(
 def delete_training_session(
     session: SessionDep,
     session_id: int,
+    training_session_service: TrainingSessionServiceDep,
 ):
     return training_session_service.remove_training_session(session, session_id)
 
 
 @router.post("/v1/training-sessions/trainee-assignement")
-def assign_trainee_to_session(session: SessionDep, session_id: int, trainee_id: int):
-    return training_session_service.assign_trainee_session(
+def assign_trainee_to_session(
+    session: SessionDep,
+    session_id: int,
+    trainee_id: int,
+    session_trainee_link_service: SessionTraineeLinkServiceDep,
+):
+    return session_trainee_link_service.create_session_trainees_link(
         session=session, trainee_id=trainee_id, session_id=session_id
     )
 

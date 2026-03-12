@@ -5,7 +5,6 @@ from src.app.schemas.user import User
 from src.app.schemas.training_sessions import (
     SessionTraineesLink,
     TrainingSessionCreate,
-    TrainingSessions,
     TrainingSessionUpdate,
 )
 
@@ -78,7 +77,7 @@ def training_session_data2():
 
 @pytest.fixture
 def training_session_overlap():
-    return TrainingSessions(
+    return TrainingSessionCreate(
         day=1,
         trainer_id=3,
         session_start="10:30:00",

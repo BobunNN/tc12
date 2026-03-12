@@ -1,7 +1,7 @@
 from typing import Optional
 
 from typing_extensions import Literal
-from datetime import time
+from datetime import datetime, time, timedelta
 from sqlmodel import AutoString, Field, SQLModel
 
 
@@ -14,6 +14,20 @@ class TrainingSessionBase(SQLModel):
         default=None, sa_type=AutoString
     )
     court_number: int
+
+    @property
+    def end_time(self) -> time:
+        """Calculates the end time based on start time and duration."""
+        start_dt = datetime.combine(datetime.today(), self.session_start)
+        end_dt = start_dt + timedelta(minutes=self.session_duration)
+        return end_dt.time()
+
+    def overlaps_with(self, other: "TrainingSessions") -> bool:
+        """Method to check if this session overlaps with another."""
+
+        return (
+            self.end_time > other.session_start and self.session_start < other.end_time
+        )
 
 
 class TrainingSessions(TrainingSessionBase, table=True):

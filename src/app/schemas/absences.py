@@ -15,10 +15,10 @@ class AbsenceBase(SQLModel):
     status: Literal["pending", "confirmed"] = Field(
         default="pending", sa_type=AutoString
     )
+
+
+class Absences(AbsenceBase, table=True):
     created_at: datetime = Field(default_factory=datetime.now)
-
-
-class Absences(AbsenceBase, table=True): ...
 
 
 class AbsenceCreate(AbsenceBase):

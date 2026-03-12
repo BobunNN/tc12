@@ -9,9 +9,23 @@ from sqlmodel import create_engine, Session
 
 from src.app.core.security import ALGORITHM
 from src.app.config import Settings, get_settings
+from src.app.core.session_trainees_link.crud_session_trainees import (
+    CRUDSessionTraineesLink,
+)
+from src.app.core.session_trainees_link.session_trainee_link_service import (
+    SessionTraineeLinkService,
+)
 from src.app.core.users.crud_users import CRUDUsers
 from src.app.core.users.user_service import UserService
 from src.app.schemas.user import TokenPayload, User
+from src.app.core.absences.absence_service import AbsenceService
+from src.app.core.training_sessions.training_session_service import (
+    TrainingSessionService,
+)
+from src.app.core.training_sessions.crud_training_sessions import CRUDTrainingSessions
+from src.app.core.absences.crud_absences import CrudAbsences
+from src.app.schemas.training_sessions import SessionTraineesLink, TrainingSessions
+from src.app.schemas.absences import Absences
 
 
 sqlite_file_name = "app.db"
@@ -98,4 +112,33 @@ def get_user_service() -> UserService:
     return UserService(crud_users=CRUDUsers(User))
 
 
+def get_training_session_service() -> TrainingSessionService:
+    return TrainingSessionService(
+        crud_training_sessions=CRUDTrainingSessions(TrainingSessions),
+        user_service=get_user_service(),
+    )
+
+
+def get_absence_service() -> AbsenceService:
+    return AbsenceService(
+        training_session_service=get_training_session_service(),
+        session_trainee_link_service=get_session_trainee_link_service(),
+        crud_absences=CrudAbsences(Absences),
+    )
+
+
+def get_session_trainee_link_service() -> SessionTraineeLinkService:
+    return SessionTraineeLinkService(
+        crud_session_trainees_link=CRUDSessionTraineesLink(SessionTraineesLink),
+        training_session_service=get_training_session_service(),
+    )
+
+
 UserServiceDep = Annotated[UserService, Depends(get_user_service)]
+AbsenceServiceDep = Annotated[AbsenceService, Depends(get_absence_service)]
+TrainingSessionServiceDep = Annotated[
+    TrainingSessionService, Depends(get_training_session_service)
+]
+SessionTraineeLinkServiceDep = Annotated[
+    SessionTraineeLinkService, Depends(get_session_trainee_link_service)
+]
