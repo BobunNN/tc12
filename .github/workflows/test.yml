@@ -13,9 +13,9 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      # - name: Install uv with all available options
-      #   uses: astral-sh/setup-uv@v7
+      - name: Install uv with all available options
+        uses: astral-sh/setup-uv@v7
     
-      # - name: Sync dependencies and run tests
-      #   run: |
-      #     uv sync && uv run pytest tests/
+      - name: Sync dependencies and run tests
+        run: |
+          uv sync && uv run pytest tests/
