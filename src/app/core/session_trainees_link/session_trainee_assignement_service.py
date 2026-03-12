@@ -1,6 +1,6 @@
 from sqlmodel import Session
 from src.app.core.session_trainees_link.crud_session_trainees import (
-    CRUDSessionTraineesLink,
+    CRUDSessionTraineeAssignment,
 )
 from src.app.core.session_trainees_link.exceptions import (
     SessionTraineesLinkAlreadyExists,
@@ -16,10 +16,10 @@ from src.app.core.training_sessions.training_session_service import (
 )
 
 
-class SessionTraineeLinkService:
+class SessionTraineeAssignementService:
     def __init__(
         self,
-        crud_session_trainees_link: CRUDSessionTraineesLink,
+        crud_session_trainees_link: CRUDSessionTraineeAssignment,
         training_session_service: TrainingSessionService,
     ) -> None:
         self.crud_session_trainees_link = crud_session_trainees_link

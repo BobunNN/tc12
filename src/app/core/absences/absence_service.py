@@ -9,8 +9,8 @@ from src.app.core.absences.exceptions import (
     TraineeNotRegisteredForSession,
     TrainerDoesNotManageTrainingSession,
 )
-from src.app.core.session_trainees_link.session_trainee_link_service import (
-    SessionTraineeLinkService,
+from src.app.core.session_trainees_link.session_trainee_assignement_service import (
+    SessionTraineeAssignementService,
 )
 from src.app.schemas.training_sessions import (
     SessionTraineeAssignement,
@@ -31,11 +31,11 @@ class AbsenceService:
     def __init__(
         self,
         training_session_service: TrainingSessionService,
-        session_trainee_link_service: SessionTraineeLinkService,
+        session_trainee_link_service: SessionTraineeAssignementService,
         crud_absences: CrudAbsences,
     ):
         self.training_session_service = training_session_service
-        self.session_trainee_link_service = session_trainee_link_service
+        self.session_trainee_assignement_service = session_trainee_link_service
         self.crud_absences = crud_absences
 
     def _next_upcoming_date_for_weekday(self, weekday: int) -> datetime:

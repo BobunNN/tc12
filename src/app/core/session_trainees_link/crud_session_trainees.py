@@ -1,11 +1,11 @@
 from src.app.core.crud.crud_base import CRUDBase
 from src.app.schemas.training_sessions import (
-    SessionTraineeAssignment,
+    SessionTraineeAssignement,
 )
 
 
 class CRUDSessionTraineeAssignment(
     CRUDBase[
-        SessionTraineeAssignment, SessionTraineeAssignment, SessionTraineeAssignment
+        SessionTraineeAssignement, SessionTraineeAssignement, SessionTraineeAssignement
     ]
 ): ...

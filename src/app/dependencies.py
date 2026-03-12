@@ -10,10 +10,10 @@ from sqlmodel import create_engine, Session
 from src.app.core.security import ALGORITHM
 from src.app.config import Settings, get_settings
 from src.app.core.session_trainees_link.crud_session_trainees import (
-    CRUDSessionTraineesLink,
+    CRUDSessionTraineeAssignment,
 )
-from src.app.core.session_trainees_link.session_trainee_link_service import (
-    SessionTraineeLinkService,
+from src.app.core.session_trainees_link.session_trainee_assignement_service import (
+    SessionTraineeAssignementService,
 )
 from src.app.core.users.crud_users import CRUDUsers
 from src.app.core.users.user_service import UserService
@@ -125,14 +125,16 @@ def get_training_session_service() -> TrainingSessionService:
 def get_absence_service() -> AbsenceService:
     return AbsenceService(
         training_session_service=get_training_session_service(),
-        session_trainee_link_service=get_session_trainee_link_service(),
+        session_trainee_link_service=get_session_trainee_assignement_service(),
         crud_absences=CrudAbsences(Absences),
     )
 
 
-def get_session_trainee_link_service() -> SessionTraineeLinkService:
-    return SessionTraineeLinkService(
-        crud_session_trainees_link=CRUDSessionTraineesLink(SessionTraineeAssignement),
+def get_session_trainee_assignement_service() -> SessionTraineeAssignementService:
+    return SessionTraineeAssignementService(
+        crud_session_trainee_assignment=CRUDSessionTraineeAssignment(
+            SessionTraineeAssignement
+        ),
         training_session_service=get_training_session_service(),
     )
 
@@ -143,5 +145,5 @@ TrainingSessionServiceDep = Annotated[
     TrainingSessionService, Depends(get_training_session_service)
 ]
 SessionTraineeLinkServiceDep = Annotated[
-    SessionTraineeLinkService, Depends(get_session_trainee_link_service)
+    SessionTraineeAssignementService, Depends(get_session_trainee_assignement_service)
 ]
