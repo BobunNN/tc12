@@ -7,7 +7,10 @@ from src.app.core.session_trainees_link.exceptions import (
     SessionTraineesLinkNotFound,
 )
 from src.app.core.training_sessions.exceptions import TraineesHasOverlappingSessions
-from src.app.schemas.training_sessions import SessionTraineesLink, TrainingSessions
+from src.app.schemas.training_sessions import (
+    SessionTraineeAssignement,
+    TrainingSessions,
+)
 from src.app.core.training_sessions.training_session_service import (
     TrainingSessionService,
 )
@@ -24,8 +27,8 @@ class SessionTraineeLinkService:
 
     def create_session_trainees_link(
         self, session: Session, session_id: int, trainee_id: int
-    ) -> SessionTraineesLink:
-        session_trainees_link = SessionTraineesLink(
+    ) -> SessionTraineeAssignement:
+        session_trainees_link = SessionTraineeAssignement(
             training_session_id=session_id, trainee_id=trainee_id
         )
         existing = self.crud_session_trainees_link.get_by_composite_key(
@@ -45,14 +48,14 @@ class SessionTraineeLinkService:
 
     def get_session_trainees_link(
         self, session: Session, session_id: int
-    ) -> list[SessionTraineesLink]:
+    ) -> list[SessionTraineeAssignement]:
         return self.crud_session_trainees_link.get_with_filters(
             session=session, filters={"training_session_id": session_id}
         )
 
     def get_trainee_session_links(
         self, session: Session, trainee_id: int
-    ) -> list[SessionTraineesLink]:
+    ) -> list[SessionTraineeAssignement]:
         return self.crud_session_trainees_link.get_with_filters(
             session=session, filters={"trainee_id": trainee_id}
         )

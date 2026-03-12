@@ -12,7 +12,10 @@ from src.app.core.absences.exceptions import (
 from src.app.core.session_trainees_link.session_trainee_link_service import (
     SessionTraineeLinkService,
 )
-from src.app.schemas.training_sessions import SessionTraineesLink, TrainingSessions
+from src.app.schemas.training_sessions import (
+    SessionTraineeAssignement,
+    TrainingSessions,
+)
 from src.app.schemas.absences import AbsenceCreate, Absences
 from src.app.schemas.user import User
 
@@ -70,7 +73,7 @@ class AbsenceService:
             if training_session.trainer_id != user.id:
                 raise TrainerDoesNotManageTrainingSession
 
-            session_trainees: list[SessionTraineesLink] = (
+            session_trainees: list[SessionTraineeAssignement] = (
                 self.session_trainee_link_service.get_session_trainees_link(
                     session=session, session_id=absence_create.training_session_id
                 )
@@ -83,7 +86,7 @@ class AbsenceService:
             if absence_create.trainee_id != user.id:
                 raise AbsenceTraineeIdMismatch
 
-            session_trainees: list[SessionTraineesLink] = (
+            session_trainees: list[SessionTraineeAssignement] = (
                 self.session_trainee_link_service.get_session_trainees_link(
                     session=session, session_id=absence_create.training_session_id
                 )

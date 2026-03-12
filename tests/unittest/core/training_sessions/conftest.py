@@ -3,7 +3,7 @@ from sqlmodel import SQLModel, Session, create_engine
 from src.app.schemas.user import User
 
 from src.app.schemas.training_sessions import (
-    SessionTraineesLink,
+    SessionTraineeAssignement,
     TrainingSessionCreate,
     TrainingSessionUpdate,
 )
@@ -134,7 +134,7 @@ def trainee_user(session):
 
 @pytest.fixture
 def trainee_session_link():
-    return SessionTraineesLink(
+    return SessionTraineeAssignement(
         training_session_id=1,
         trainee_id=2,
     )

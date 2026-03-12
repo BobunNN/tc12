@@ -1,8 +1,6 @@
 from fastapi import APIRouter, Depends, Security
 from src.app.dependencies import (
-    CurrentUser,
     SessionDep,
-    SessionTraineeLinkServiceDep,
     TrainingSessionServiceDep,
     get_current_user,
 )
@@ -26,28 +24,6 @@ def create_training_session(
 ):
     return training_session_service.create_training_session(
         session=session, session_create=session_create
-    )
-
-
-@router.get(
-    "/v1/training-sessions/session-trainees", dependencies=[Depends(get_current_user)]
-)
-def get_session_trainee(
-    session: SessionDep,
-    session_id: int,
-    training_session_service: TrainingSessionServiceDep,
-):
-    return training_session_service.search_session_trainees(session, session_id)
-
-
-@router.get("/v1/training-sessions/me", dependencies=[Depends(get_current_user)])
-def get_self_training_session(
-    session: SessionDep,
-    current_user: CurrentUser,
-    training_session_service: TrainingSessionServiceDep,
-):
-    return training_session_service.get_self_training_session(
-        session=session, user=current_user
     )
 
 
@@ -97,18 +73,6 @@ def delete_training_session(
     training_session_service: TrainingSessionServiceDep,
 ):
     return training_session_service.remove_training_session(session, session_id)
-
-
-@router.post("/v1/training-sessions/trainee-assignement")
-def assign_trainee_to_session(
-    session: SessionDep,
-    session_id: int,
-    trainee_id: int,
-    session_trainee_link_service: SessionTraineeLinkServiceDep,
-):
-    return session_trainee_link_service.create_session_trainees_link(
-        session=session, trainee_id=trainee_id, session_id=session_id
-    )
 
 
 # TODO move to batch resources

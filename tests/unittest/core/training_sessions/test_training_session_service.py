@@ -21,12 +21,12 @@ from src.app.core.session_trainees_link.crud_session_trainees import (
 from src.app.core.session_trainees_link.session_trainee_link_service import (
     SessionTraineeLinkService,
 )
-from src.app.schemas.training_sessions import SessionTraineesLink
+from src.app.schemas.training_sessions import SessionTraineeAssignement
 from src.app.schemas.user import User
 
 crud_training_sessions = CRUDTrainingSessions(TrainingSessions)
 crud_users = CRUDUsers(User)
-crud_session_trainees_link = CRUDSessionTraineesLink(SessionTraineesLink)
+crud_session_trainees_link = CRUDSessionTraineesLink(SessionTraineeAssignement)
 user_service = UserService(crud_users)
 training_session_service = TrainingSessionService(crud_training_sessions, user_service)
 session_trainee_link_service = SessionTraineeLinkService(

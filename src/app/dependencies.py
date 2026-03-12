@@ -24,7 +24,10 @@ from src.app.core.training_sessions.training_session_service import (
 )
 from src.app.core.training_sessions.crud_training_sessions import CRUDTrainingSessions
 from src.app.core.absences.crud_absences import CrudAbsences
-from src.app.schemas.training_sessions import SessionTraineesLink, TrainingSessions
+from src.app.schemas.training_sessions import (
+    SessionTraineeAssignement,
+    TrainingSessions,
+)
 from src.app.schemas.absences import Absences
 
 
@@ -129,7 +132,7 @@ def get_absence_service() -> AbsenceService:
 
 def get_session_trainee_link_service() -> SessionTraineeLinkService:
     return SessionTraineeLinkService(
-        crud_session_trainees_link=CRUDSessionTraineesLink(SessionTraineesLink),
+        crud_session_trainees_link=CRUDSessionTraineesLink(SessionTraineeAssignement),
         training_session_service=get_training_session_service(),
     )
 

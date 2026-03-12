@@ -50,9 +50,9 @@ class TrainingSessionCreate(TrainingSessionBase):
     pass
 
 
-class SessionTraineesLink(SQLModel, table=True):
+class SessionTraineeAssignment(SQLModel, table=True):
     __tablename__ = "training_session_trainees"
     training_session_id: int = Field(
-        foreign_key="training_sessions.id", primary_key=True
+        primary_key=True, foreign_key="training_sessions.id"
     )
-    trainee_id: int = Field(foreign_key="user_accounts.id", primary_key=True)
+    trainee_id: int = Field(primary_key=True, foreign_key="user_accounts.id")
