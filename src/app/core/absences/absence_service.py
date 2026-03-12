@@ -9,11 +9,11 @@ from src.app.core.absences.exceptions import (
     TraineeNotRegisteredForSession,
     TrainerDoesNotManageTrainingSession,
 )
-from src.app.core.session_trainees_assignement.session_trainee_assignement_service import (
-    SessionTraineeAssignementService,
+from src.app.core.session_trainees_assignment.session_trainee_assignment_service import (
+    SessionTraineeAssignmentService,
 )
 from src.app.schemas.training_sessions import (
-    SessionTraineeAssignement,
+    SessionTraineeAssignment,
     TrainingSessions,
 )
 from src.app.schemas.absences import AbsenceCreate, Absences
@@ -31,7 +31,7 @@ class AbsenceService:
     def __init__(
         self,
         training_session_service: TrainingSessionService,
-        session_trainee_link_service: SessionTraineeAssignementService,
+        session_trainee_link_service: SessionTraineeAssignmentService,
         crud_absences: CrudAbsences,
     ):
         self.training_session_service = training_session_service
@@ -73,7 +73,7 @@ class AbsenceService:
             if training_session.trainer_id != user.id:
                 raise TrainerDoesNotManageTrainingSession
 
-            session_trainees: list[SessionTraineeAssignement] = (
+            session_trainees: list[SessionTraineeAssignment] = (
                 self.session_trainee_link_service.get_session_trainees_link(
                     session=session, session_id=absence_create.training_session_id
                 )
@@ -86,7 +86,7 @@ class AbsenceService:
             if absence_create.trainee_id != user.id:
                 raise AbsenceTraineeIdMismatch
 
-            session_trainees: list[SessionTraineeAssignement] = (
+            session_trainees: list[SessionTraineeAssignment] = (
                 self.session_trainee_link_service.get_session_trainees_link(
                     session=session, session_id=absence_create.training_session_id
                 )

@@ -25,7 +25,7 @@ from src.app.core.training_sessions.exceptions import (
     TraineesHasOverlappingSessions,
     TrainingSessionMaxCapacity,
 )
-from src.app.core.session_trainees_assignement.exceptions import (
+from src.app.core.session_trainees_assignment.exceptions import (
     SessionTraineeAssignementAlreadyExists,
 )
 

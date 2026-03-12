@@ -1,14 +1,14 @@
 from sqlmodel import Session
-from src.app.core.session_trainees_assignement.crud_session_trainees import (
+from src.app.core.session_trainees_assignment.crud_session_trainees import (
     CRUDSessionTraineeAssignment,
 )
-from src.app.core.session_trainees_assignement.exceptions import (
+from src.app.core.session_trainees_assignment.exceptions import (
     SessionTraineeAssignementAlreadyExists,
     SessionTraineesLinkNotFound,
 )
 from src.app.core.training_sessions.exceptions import TraineesHasOverlappingSessions
 from src.app.schemas.training_sessions import (
-    SessionTraineeAssignement,
+    SessionTraineeAssignment,
     TrainingSessions,
 )
 from src.app.core.training_sessions.training_session_service import (
@@ -17,7 +17,7 @@ from src.app.core.training_sessions.training_session_service import (
 from src.app.schemas.user import User
 
 
-class SessionTraineeAssignementService:
+class SessionTraineeAssignmentService:
     def __init__(
         self,
         crud_session_trainees_link: CRUDSessionTraineeAssignment,
@@ -31,8 +31,8 @@ class SessionTraineeAssignementService:
 
     def create_session_trainees_link(
         self, session: Session, session_id: int, trainee_id: int
-    ) -> SessionTraineeAssignement:
-        new_assignement = SessionTraineeAssignement(
+    ) -> SessionTraineeAssignment:
+        new_assignement = SessionTraineeAssignment(
             training_session_id=session_id, trainee_id=trainee_id
         )
         existing = self.crud_session_trainees_link.get_by_composite_key(
@@ -60,7 +60,7 @@ class SessionTraineeAssignementService:
         Returns:
             list[int]: _description_
         """
-        res: list[SessionTraineeAssignement] = (
+        res: list[SessionTraineeAssignment] = (
             self.crud_session_trainees_link.get_with_filters(
                 session=session, filters={"training_session_id": session_id}
             )
@@ -69,7 +69,7 @@ class SessionTraineeAssignementService:
 
     def get_user_session(
         self, session: Session, trainee_id: int
-    ) -> list[SessionTraineeAssignement]:
+    ) -> list[SessionTraineeAssignment]:
         """
         Fetches all training sessions of a give user (trainee and trainer)
 
@@ -97,7 +97,7 @@ class SessionTraineeAssignementService:
         self,
         session: Session,
         trainee_id: int,
-        session_to_assign: SessionTraineeAssignement,
+        session_to_assign: SessionTraineeAssignment,
     ):
         """
         Checks is trainees has any overlapping training session e.g. session occuring at the same time
@@ -141,7 +141,7 @@ class SessionTraineeAssignementService:
                 session=session, filters=search_filters
             )
         else:
-            user_sessions: list[SessionTraineeAssignement] = (
+            user_sessions: list[SessionTraineeAssignment] = (
                 self.crud_session_trainees_link.get_with_filters(
                     session=session, filters={"trainee_id": user.id}
                 )
