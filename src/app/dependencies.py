@@ -10,11 +10,11 @@ from sqlmodel import create_engine, Session
 
 from src.app.core.security import ALGORITHM
 from src.app.config import Settings, get_settings
-from src.app.core.session_trainees_assignement.crud_session_trainees import (
+from src.app.core.session_trainees_assignment.crud_session_trainees import (
     CRUDSessionTraineeAssignment,
 )
-from src.app.core.session_trainees_assignement.session_trainee_assignement_service import (
-    SessionTraineeAssignementService,
+from src.app.core.session_trainees_assignment.session_trainee_assignment_service import (
+    SessionTraineeAssignmentService,
 )
 from src.app.core.users.crud_users import CRUDUsers
 from src.app.core.users.user_service import UserService
@@ -26,7 +26,7 @@ from src.app.core.training_sessions.training_session_service import (
 from src.app.core.training_sessions.crud_training_sessions import CRUDTrainingSessions
 from src.app.core.absences.crud_absences import CrudAbsences
 from src.app.schemas.training_sessions import (
-    SessionTraineeAssignement,
+    SessionTraineeAssignment,
     TrainingSessions,
 )
 from src.app.schemas.absences import Absences
@@ -131,10 +131,10 @@ def get_absence_service() -> AbsenceService:
     )
 
 
-def get_session_trainee_assignement_service() -> SessionTraineeAssignementService:
-    return SessionTraineeAssignementService(
+def get_session_trainee_assignement_service() -> SessionTraineeAssignmentService:
+    return SessionTraineeAssignmentService(
         crud_session_trainees_link=CRUDSessionTraineeAssignment(
-            SessionTraineeAssignement
+            SessionTraineeAssignment
         ),
         training_session_service=get_training_session_service(),
     )
@@ -146,5 +146,5 @@ TrainingSessionServiceDep = Annotated[
     TrainingSessionService, Depends(get_training_session_service)
 ]
 SessionTraineeLinkServiceDep = Annotated[
-    SessionTraineeAssignementService, Depends(get_session_trainee_assignement_service)
+    SessionTraineeAssignmentService, Depends(get_session_trainee_assignement_service)
 ]

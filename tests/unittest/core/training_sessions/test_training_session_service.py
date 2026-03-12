@@ -15,21 +15,21 @@ from src.app.core.training_sessions.training_session_service import (
     TrainingSessionService,
 )
 from src.app.core.users.crud_users import CRUDUsers
-from src.app.core.session_trainees_assignement.crud_session_trainees import (
+from src.app.core.session_trainees_assignment.crud_session_trainees import (
     CRUDSessionTraineeAssignment,
 )
-from src.app.core.session_trainees_assignement.session_trainee_assignement_service import (
-    SessionTraineeAssignementService,
+from src.app.core.session_trainees_assignment.session_trainee_assignment_service import (
+    SessionTraineeAssignmentService,
 )
-from src.app.schemas.training_sessions import SessionTraineeAssignement
+from src.app.schemas.training_sessions import SessionTraineeAssignment
 from src.app.schemas.user import User
 
 crud_training_sessions = CRUDTrainingSessions(TrainingSessions)
 crud_users = CRUDUsers(User)
-crud_session_trainees_link = CRUDSessionTraineeAssignment(SessionTraineeAssignement)
+crud_session_trainees_link = CRUDSessionTraineeAssignment(SessionTraineeAssignment)
 user_service = UserService(crud_users)
 training_session_service = TrainingSessionService(crud_training_sessions, user_service)
-session_trainee_assignement_service = SessionTraineeAssignementService(
+session_trainee_assignement_service = SessionTraineeAssignmentService(
     crud_session_trainees_link, training_session_service
 )
 
