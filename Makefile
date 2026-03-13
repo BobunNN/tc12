@@ -9,3 +9,7 @@ dev-start:
 .PHONY: dev-stop
 dev-stop:
 	docker compose -f provision/docker-compose.yml down
+
+.PHONY: test-all
+test-all:
+	pytest --cov tests/
