@@ -1,5 +1,4 @@
 import pytest
-from sqlmodel import SQLModel, Session, create_engine
 from src.app.schemas.user import User
 
 from src.app.schemas.training_sessions import (
@@ -7,48 +6,6 @@ from src.app.schemas.training_sessions import (
     TrainingSessionCreate,
     TrainingSessionUpdate,
 )
-
-
-@pytest.fixture
-def session():
-    engine = create_engine("sqlite:///:memory:", echo=False)
-    SQLModel.metadata.create_all(engine)
-    with Session(engine) as session:
-        user = User(
-            first_name="John",
-            last_name="Doe",
-            email="john@example.com",
-            hashed_password="...",
-            is_superuser=False,
-            is_trainer=True,
-            id=1,
-        )
-        session.add(user)
-
-        user = User(
-            first_name="Gael",
-            last_name="Monfils",
-            email="gael@monfils.com",
-            hashed_password="...",
-            is_superuser=False,
-            is_trainer=False,
-            id=2,
-        )
-        session.add(user)
-
-        user = User(
-            first_name="Maxime",
-            last_name="Daban",
-            email="maxime@daban.com",
-            hashed_password="...",
-            is_superuser=False,
-            is_trainer=True,
-            id=3,
-        )
-        session.add(user)
-
-        session.commit()
-        yield session
 
 
 @pytest.fixture
