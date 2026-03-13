@@ -74,6 +74,32 @@ def users_init():
 
 
 @pytest.fixture
+def trainer_user(session):
+    return User(
+        first_name="John",
+        last_name="Doe",
+        email="john@example.com",
+        hashed_password="...",
+        is_superuser=False,
+        is_trainer=True,
+        id=1,
+    )
+
+
+@pytest.fixture
+def trainee_user(session):
+    return User(
+        first_name="Gael",
+        last_name="Monfils",
+        email="gael@monfils.com",
+        hashed_password="...",
+        is_superuser=False,
+        is_trainer=False,
+        id=2,
+    )
+
+
+@pytest.fixture
 def session_training_assignment(
     session,
 ):

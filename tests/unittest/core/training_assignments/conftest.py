@@ -20,6 +20,14 @@ def new_training_assignment2():
 
 
 @pytest.fixture
+def new_training_assignment3():
+    return SessionTraineeAssignment(
+        training_session_id=2,
+        trainee_id=4,
+    )
+
+
+@pytest.fixture
 def new_training_assignment_with_trainer():
     return SessionTraineeAssignment(
         training_session_id=1,

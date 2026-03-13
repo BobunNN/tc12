@@ -20,7 +20,3 @@ class TrainingSessionInvalidTrainer(Exception):
 
 class TrainingSessionInvalidLocation(Exception):
     """Raised when trying to create a training session with a non trainer"""
-
-
-class TraineesHasOverlappingSessions(Exception):
-    """Raised when trying assign trainee to an overlapping session"""

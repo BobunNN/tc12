@@ -22,11 +22,11 @@ from src.app.core.training_sessions.exceptions import (
     TrainingSessionOverlap,
     TrainingSessionInvalidTrainer,
     TrainingSessionNotFound,
-    TraineesHasOverlappingSessions,
 )
 from src.app.core.session_trainees_assignment.exceptions import (
     SessionTraineeAssignementAlreadyExists,
     TrainingSessionMaxCapacity,
+    TraineesHasOverlappingSessions,
 )
 from src.app.core.substitutions.exceptions import (
     SubstitutionRequestAlreadyExists,

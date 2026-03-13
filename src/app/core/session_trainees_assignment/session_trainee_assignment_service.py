@@ -6,8 +6,6 @@ from src.app.core.session_trainees_assignment.exceptions import (
     SessionTraineeAssignementAlreadyExists,
     SessionTraineesLinkNotFound,
     TraineeIsTrainer,
-)
-from src.app.core.training_sessions.exceptions import (
     TraineesHasOverlappingSessions,
 )
 from src.app.schemas.training_sessions import (
@@ -161,7 +159,7 @@ class SessionTraineeAssignmentService:
             )
             sessions = []
             for user_session in user_sessions:
-                sessions.extend(
+                sessions.append(
                     self.training_session_service.get_training_session(
                         session=session, session_id=user_session.training_session_id
                     )
