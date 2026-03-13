@@ -5,14 +5,18 @@ from src.app.core.session_trainees_assignment.crud_session_trainees import (
 from src.app.core.session_trainees_assignment.exceptions import (
     SessionTraineeAssignementAlreadyExists,
     SessionTraineesLinkNotFound,
+    TraineeIsTrainer,
 )
-from src.app.core.training_sessions.exceptions import TraineesHasOverlappingSessions
+from src.app.core.training_sessions.exceptions import (
+    TraineesHasOverlappingSessions,
+)
 from src.app.schemas.training_sessions import (
     SessionTraineeAssignment,
     TrainingSessions,
 )
 from src.app.core.training_sessions.training_session_service import (
     TrainingSessionService,
+    UserService,
 )
 from src.app.schemas.user import User
 
@@ -22,9 +26,11 @@ class SessionTraineeAssignmentService:
         self,
         crud_session_trainees_link: CRUDSessionTraineeAssignment,
         training_session_service: TrainingSessionService,
+        user_service: UserService,
     ) -> None:
         self.crud_session_trainees_link = crud_session_trainees_link
         self.training_session_service = training_session_service
+        self.user_service = user_service
 
     def get_all(self, session: Session):
         return self.crud_session_trainees_link.get_all(session=session)
@@ -35,12 +41,21 @@ class SessionTraineeAssignmentService:
         new_assignement = SessionTraineeAssignment(
             training_session_id=session_id, trainee_id=trainee_id
         )
+
+        self.training_session_service.get_training_session(
+            session,
+            session_id,  # check training session exists
+        )
+
         existing = self.crud_session_trainees_link.get_by_composite_key(
             session=session, training_session_id=session_id, trainee_id=trainee_id
         )
 
         if existing:
             raise SessionTraineeAssignementAlreadyExists
+
+        if self.user_service.check_is_trainer(session, trainee_id):
+            raise TraineeIsTrainer
 
         if self.check_trainee_session_overlap(session, trainee_id, new_assignement):
             raise TraineesHasOverlappingSessions
@@ -71,7 +86,7 @@ class SessionTraineeAssignmentService:
         self, session: Session, trainee_id: int
     ) -> list[SessionTraineeAssignment]:
         """
-        Fetches all training sessions of a give user (trainee and trainer)
+        Fetches all training sessions of a given user
 
         Args:
             session (Session): _description_
@@ -123,9 +138,7 @@ class SessionTraineeAssignmentService:
 
             if not existing_session:
                 continue
-            print("DEBUG")
-            print(f"training_assignement : {training_assignement}")
-            print(f"existing_session : {existing_session}")
+
             if existing_session.day == training_assignement.day:
                 if existing_session.overlaps_with(training_assignement):
                     return True

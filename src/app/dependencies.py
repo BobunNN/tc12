@@ -148,6 +148,7 @@ def get_session_trainee_assignement_service() -> SessionTraineeAssignmentService
             SessionTraineeAssignment
         ),
         training_session_service=get_training_session_service(),
+        user_service=get_user_service(),
     )
 
 

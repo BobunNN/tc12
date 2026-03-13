@@ -28,7 +28,7 @@ class UserService:
 
     def update_user_me(
         self, session: Session, user_in: UserUpdateMe, current_user: User
-    ) -> Any:
+    ) -> User:
         if user_in.email:
             existing_user = self.crud_users.get_by_email(
                 session=session, email=user_in.email
@@ -39,7 +39,7 @@ class UserService:
 
     def update_password_me(
         self, session: Session, body: UpdatePassword, current_user: User
-    ) -> Any:
+    ) -> User:
 
         verified, _ = verify_password(
             body.current_password, current_user.hashed_password

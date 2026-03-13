@@ -16,3 +16,7 @@ class TraineesHasOverlappingSessions(Exception):
 
 class TrainingSessionMaxCapacity(Exception):
     pass
+
+
+class TraineeIsTrainer(Exception):
+    """Raised when trying to assign a user that is a trainer to a session"""
