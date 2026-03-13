@@ -25,11 +25,14 @@ from src.app.core.training_sessions.training_session_service import (
 )
 from src.app.core.training_sessions.crud_training_sessions import CRUDTrainingSessions
 from src.app.core.absences.crud_absences import CrudAbsences
+from src.app.core.substitutions.crud_substitutions import CrudSubstitutions
+from src.app.core.substitutions.substitution_service import SubstitutionService
 from src.app.schemas.training_sessions import (
     SessionTraineeAssignment,
     TrainingSessions,
 )
 from src.app.schemas.absences import Absences
+from src.app.schemas.substitution_requests import SubstitutionRequests
 
 
 sqlite_file_name = "app.db"
@@ -131,6 +134,14 @@ def get_absence_service() -> AbsenceService:
     )
 
 
+def get_substitution_service() -> SubstitutionService:
+    return SubstitutionService(
+        crud_substitutions=CrudSubstitutions(SubstitutionRequests),
+        training_session_service=get_training_session_service(),
+        crud_absences=CrudAbsences(Absences),
+    )
+
+
 def get_session_trainee_assignement_service() -> SessionTraineeAssignmentService:
     return SessionTraineeAssignmentService(
         crud_session_trainees_link=CRUDSessionTraineeAssignment(
@@ -147,4 +158,7 @@ TrainingSessionServiceDep = Annotated[
 ]
 SessionTraineeLinkServiceDep = Annotated[
     SessionTraineeAssignmentService, Depends(get_session_trainee_assignement_service)
+]
+SubstitutionServiceDep = Annotated[
+    SubstitutionService, Depends(get_substitution_service)
 ]
