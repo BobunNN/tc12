@@ -13,8 +13,9 @@ from src.app.core.training_sessions.exceptions import TrainingSessionNotFound
 from src.app.core.training_sessions.training_session_service import (
     CRUDTrainingSessions,
     TrainingSessionService,
-    UserService,
 )
+from src.app.core.users.user_service import UserService
+
 from src.app.core.users.crud_users import CRUDUsers
 
 from src.app.schemas.training_sessions import SessionTraineeAssignment, TrainingSessions
@@ -141,3 +142,34 @@ def test_assignment_overlap(
             new_assignment_overlap.training_session_id,
             new_assignment_overlap.trainee_id,
         )
+
+
+def test_get_self_training_session(
+    session_training_assignment,
+    new_training_assignment,
+    new_training_assignment2,
+    new_training_assignment3,
+    trainer_user,
+    trainee_user,
+):
+    training_assignment_service.create_session_trainees_link(
+        session_training_assignment,
+        new_training_assignment.training_session_id,
+        new_training_assignment.trainee_id,
+    )
+
+    training_assignment_service.create_session_trainees_link(
+        session_training_assignment,
+        new_training_assignment3.training_session_id,
+        new_training_assignment3.trainee_id,
+    )
+
+    trainer_sessions = training_assignment_service.get_self_training_session(
+        session_training_assignment, trainer_user
+    )
+    assert len(trainer_sessions) == 2
+
+    trainee_sessions = training_assignment_service.get_self_training_session(
+        session_training_assignment, trainee_user
+    )
+    assert len(trainee_sessions) == 1

@@ -1,5 +1,4 @@
 import pytest
-from src.app.schemas.user import User
 
 from src.app.schemas.training_sessions import (
     SessionTraineeAssignment,
@@ -60,32 +59,6 @@ def training_session_invalid_trainer():
         session_duration=60,
         location="Leo Lagrange",
         court_number=1,
-    )
-
-
-@pytest.fixture
-def trainer_user(session):
-    return User(
-        first_name="John",
-        last_name="Doe",
-        email="john@example.com",
-        hashed_password="...",
-        is_superuser=False,
-        is_trainer=True,
-        id=1,
-    )
-
-
-@pytest.fixture
-def trainee_user(session):
-    return User(
-        first_name="Gael",
-        last_name="Monfils",
-        email="gael@monfils.com",
-        hashed_password="...",
-        is_superuser=False,
-        is_trainer=False,
-        id=2,
     )
 
 

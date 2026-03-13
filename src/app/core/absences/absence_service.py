@@ -14,7 +14,6 @@ from src.app.core.session_trainees_assignment.session_trainee_assignment_service
 )
 from src.app.schemas.training_sessions import (
     SessionTraineeAssignment,
-    TrainingSessions,
 )
 from src.app.schemas.absences import AbsenceCreate, Absences
 from src.app.schemas.user import User
@@ -56,6 +55,7 @@ class AbsenceService:
         training_session = self.training_session_service.get_training_session(
             session=session, session_id=absence_create.training_session_id
         )
+
         if absence_create.absence_date is None:
             absence_create.absence_date = self._next_upcoming_date_for_weekday(
                 int(training_session.day)
@@ -64,36 +64,21 @@ class AbsenceService:
         if not self.session_absence_date_validation(session, absence_create):
             raise AbsenceDateMismatchSessionDay
 
-        if user.is_trainer:
-            training_session: TrainingSessions = (
-                self.training_session_service.get_training_session(
-                    session=session, session_id=absence_create.training_session_id
-                )
+        session_trainees_ids: list[SessionTraineeAssignment] = (
+            self.session_trainee_assignement_service.get_session_trainees(
+                session=session, session_id=absence_create.training_session_id
             )
+        )
+
+        if absence_create.trainee_id not in session_trainees_ids:
+            raise TraineeNotRegisteredForSession
+
+        if user.is_trainer:
             if training_session.trainer_id != user.id:
                 raise TrainerDoesNotManageTrainingSession
-
-            session_trainees: list[SessionTraineeAssignment] = (
-                self.session_trainee_link_service.get_session_trainees_link(
-                    session=session, session_id=absence_create.training_session_id
-                )
-            )
-            registered_trainee_ids = [st.trainee_id for st in session_trainees]
-            if absence_create.trainee_id not in registered_trainee_ids:
-                raise TraineeNotRegisteredForSession
-
         else:
             if absence_create.trainee_id != user.id:
                 raise AbsenceTraineeIdMismatch
-
-            session_trainees: list[SessionTraineeAssignment] = (
-                self.session_trainee_link_service.get_session_trainees_link(
-                    session=session, session_id=absence_create.training_session_id
-                )
-            )
-            registered_trainee_ids = [st.trainee_id for st in session_trainees]
-            if user.id not in registered_trainee_ids:
-                raise TraineeNotRegisteredForSession
 
         existing = self.crud_absences.get_by_composite_key(
             session,

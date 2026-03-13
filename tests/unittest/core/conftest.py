@@ -2,6 +2,7 @@ import pytest
 from sqlmodel import SQLModel, Session, create_engine
 
 from src.app.schemas.training_sessions import (
+    SessionTraineeAssignment,
     TrainingSessions,
     time,
 )
@@ -68,9 +69,37 @@ def users_init():
             id=5,
         ),
     ]
+    # trainers : 1, 3
+    # trainees : 2, 4, 5
 
     for user in users:
         yield user
+
+
+@pytest.fixture
+def trainer_user(session):
+    return User(
+        first_name="John",
+        last_name="Doe",
+        email="john@example.com",
+        hashed_password="...",
+        is_superuser=False,
+        is_trainer=True,
+        id=1,
+    )
+
+
+@pytest.fixture
+def trainee_user(session):
+    return User(
+        first_name="Gael",
+        last_name="Monfils",
+        email="gael@monfils.com",
+        hashed_password="...",
+        is_superuser=False,
+        is_trainer=False,
+        id=2,
+    )
 
 
 @pytest.fixture
@@ -118,6 +147,36 @@ def training_session_init():
             court_number=1,
         ),
     ]
-
+    # Training 1 and 3 overlaps on time (not location)
     for se in sessions:
         yield se
+
+
+def session_assignment_init():
+    assignments = [
+        SessionTraineeAssignment(  # id=1
+            training_session_id=1,
+            trainee_id=2,
+        ),
+        SessionTraineeAssignment(  # id=2
+            training_session_id=1,
+            trainee_id=4,
+        ),
+        SessionTraineeAssignment(  # id=3
+            training_session_id=3,
+            trainee_id=5,
+        ),
+    ]
+
+    for assgnmnts in assignments:
+        yield assgnmnts
+
+
+@pytest.fixture
+def session_absences(
+    session_training_assignment,
+):
+    for se in session_assignment_init():
+        session_training_assignment.add(se)
+    session_training_assignment.commit()
+    yield session_training_assignment
