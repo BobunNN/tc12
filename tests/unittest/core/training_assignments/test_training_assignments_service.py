@@ -13,8 +13,9 @@ from src.app.core.training_sessions.exceptions import TrainingSessionNotFound
 from src.app.core.training_sessions.training_session_service import (
     CRUDTrainingSessions,
     TrainingSessionService,
-    UserService,
 )
+from src.app.core.users.user_service import UserService
+
 from src.app.core.users.crud_users import CRUDUsers
 
 from src.app.schemas.training_sessions import SessionTraineeAssignment, TrainingSessions

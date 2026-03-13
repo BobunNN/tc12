@@ -64,7 +64,7 @@ class SessionTraineeAssignmentService:
 
     def get_session_trainees(self, session: Session, session_id: int) -> list[int]:
         """
-        Fetches all trainees for a give training session
+        Fetches all trainees ID for a give training session
 
         Args:
             session (Session): _description_
