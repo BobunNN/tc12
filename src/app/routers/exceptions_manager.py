@@ -28,6 +28,10 @@ from src.app.core.training_sessions.exceptions import (
 from src.app.core.session_trainees_assignment.exceptions import (
     SessionTraineeAssignementAlreadyExists,
 )
+from src.app.core.substitutions.exceptions import (
+    SubstitutionRequestAlreadyExists,
+    SubstitutionRequestNotFound,
+)
 
 
 def register_exception_handlers(app: FastAPI):
@@ -78,6 +82,14 @@ def register_exception_handlers(app: FastAPI):
     # Training assignement
     app.add_exception_handler(
         SessionTraineeAssignementAlreadyExists, handle_assignement_already_exists
+    )
+
+    # Substitutions
+    app.add_exception_handler(
+        SubstitutionRequestNotFound, handle_substitution_request_not_found
+    )
+    app.add_exception_handler(
+        SubstitutionRequestAlreadyExists, handle_substitution_request_already_exists
     )
 
 
@@ -242,4 +254,22 @@ async def handle_assignement_already_exists(
     raise HTTPException(
         status_code=status.HTTP_409_CONFLICT,
         detail="Assignement already exists",
+    )
+
+
+async def handle_substitution_request_not_found(
+    request: Request, exc: SubstitutionRequestNotFound
+):
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="Substitution request not found",
+    )
+
+
+async def handle_substitution_request_already_exists(
+    request: Request, exc: SubstitutionRequestAlreadyExists
+):
+    raise HTTPException(
+        status_code=status.HTTP_409_CONFLICT,
+        detail="Substitution request already exists for this session, date and requester",
     )

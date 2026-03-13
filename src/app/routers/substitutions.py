@@ -1,28 +1,37 @@
-from typing import Annotated
-
-from fastapi import APIRouter, Depends, Security
+from fastapi import APIRouter, Depends
 from src.app.dependencies import (
     CurrentUser,
     SessionDep,
+    SubstitutionServiceDep,
     get_current_active_superuser,
     get_current_user,
 )
-from src.app.schemas.substitution_requests import SubstitutionRequests
-from src.app.core.substitutions import substitution_service
-from src.app.schemas.user import User
+from src.app.schemas.substitution_requests import (
+    SubstitutionRequestCreate,
+    SubstitutionRequestUpdate,
+)
 
 router = APIRouter(tags=["substitutions"])
 
 
 @router.post("/v1/substitution-requests", dependencies=[Depends(get_current_user)])
-def create_substitution_request(session: SessionDep, request: SubstitutionRequests):
+def create_substitution_request(
+    session: SessionDep,
+    request: SubstitutionRequestCreate,
+    substitution_service: SubstitutionServiceDep,
+):
     return substitution_service.create_substitution_request(session, request)
 
 
 @router.get(
     "/v1/substitution-requests/me",
+    dependencies=[Depends(get_current_user)],
 )
-def get_self_substitutions_requests(session: SessionDep, current_user: CurrentUser):
+def get_self_substitutions_requests(
+    session: SessionDep,
+    current_user: CurrentUser,
+    substitution_service: SubstitutionServiceDep,
+):
     """
     Retrieve substitution requests relevant to the current user.
 
@@ -45,7 +54,11 @@ def get_self_substitutions_requests(session: SessionDep, current_user: CurrentUs
     "/v1/substitution-requests/{request_id}",
     dependencies=[Depends(get_current_active_superuser)],
 )
-def get_substitution_requests(session: SessionDep, request_id: int):
+def get_substitution_requests(
+    session: SessionDep,
+    request_id: int,
+    substitution_service: SubstitutionServiceDep,
+):
     return substitution_service.get_substitution_request(session, request_id)
 
 
@@ -53,7 +66,12 @@ def get_substitution_requests(session: SessionDep, request_id: int):
     "/v1/substitution-requests",
     dependencies=[Depends(get_current_active_superuser)],
 )
-def get_all_substitutions(session: SessionDep, limit: int, offset: int):
+def get_all_substitutions(
+    session: SessionDep,
+    limit: int,
+    offset: int,
+    substitution_service: SubstitutionServiceDep,
+):
     """
     Fetches all substitution requests, only available for superusers
     """
@@ -62,33 +80,30 @@ def get_all_substitutions(session: SessionDep, limit: int, offset: int):
 
 @router.patch(
     "/v1/substitution-requests/{request_id}",
+    dependencies=[Depends(get_current_user)],
 )
-async def update_substitution(
+def update_substitution(
     session: SessionDep,
     request_id: int,
-    request_update: dict,
-    trainer: Annotated[User, Security(get_current_user, scopes=["trainer"])],
+    request_update: SubstitutionRequestUpdate,
+    # trainer: Annotated[User, Security(get_current_user, scopes=["trainer"])],
+    substitution_service: SubstitutionServiceDep,
 ):
-    """Route to approve/decline substitution requests. If one request is approved, all other requests concerning the same available
-
-    Args:
-        session (SessionDep): _description_
-        request_id (int): _description_
-        request_update (dict): _description_
-        trainer (Annotated[User, Security, optional): _description_. Defaults to ["trainer"])].
-    """
-    ...  # TODO
-    # return substitution_service.update_substitution_request(
-    #     session, db_request, request_update
-    # )
+    """Route to approve/decline substitution requests. If one request is approved, all other requests concerning the same available slot may be rejected."""
+    return substitution_service.update_substitution_request(
+        session, request_id, request_update
+    )
 
 
-@router.delete("/v1/substitution-requests/{request_id}")
+@router.delete(
+    "/v1/substitution-requests/{request_id}",
+    dependencies=[Depends(get_current_user)],
+)
 def delete_substitution(
-    session: SessionDep, request_id: int, current_user: CurrentUser
+    session: SessionDep,
+    request_id: int,
+    current_user: CurrentUser,
+    substitution_service: SubstitutionServiceDep,
 ):
-    ...  # TODO
-    # success = crud_substitutions.delete_substitution_request(session, request_id)
-    # if not success:
-    #     raise HTTPException(status_code=404, detail="Substitution request not found")
-    # return {"detail": "Deleted successfully"}
+    substitution_service.delete_substitution_request(session, request_id, current_user)
+    return {"detail": "Deleted successfully"}
