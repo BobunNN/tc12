@@ -7,13 +7,14 @@ from src.app.dependencies import (
     SessionDep,
     get_current_active_superuser,
 )
-from src.app.schemas.absences import AbsenceCreate
+from src.app.schemas.absences import AbsenceCreate, AbsencePublic
+from src.app.schemas.responses import Message
 
 
 router = APIRouter(tags=["absences"])
 
 
-@router.post("/v1/absences")
+@router.post("/v1/absences", response_model=AbsencePublic)
 def create_absence(
     session: SessionDep,
     absence: AbsenceCreate,
@@ -23,7 +24,7 @@ def create_absence(
     return absence_service.open_absence_slot(session, absence, current_user)
 
 
-@router.get("/v1/absences/me")
+@router.get("/v1/absences/me", response_model=AbsencePublic)
 def get_my_absences(
     session: SessionDep,
     current_user: CurrentUser,
@@ -39,6 +40,7 @@ def get_my_absences(
 @router.get(
     "/v1/absences/{training_id}/{trainee_id}/{absence_date}",
     dependencies=[Depends(get_current_active_superuser)],
+    response_model=AbsencePublic,
 )
 def get_absence(
     session: SessionDep,
@@ -55,12 +57,18 @@ def get_absence(
     )
 
 
-@router.get("/v1/absences", dependencies=[Depends(get_current_active_superuser)])
+@router.get(
+    "/v1/absences",
+    dependencies=[Depends(get_current_active_superuser)],
+    response_model=list[AbsencePublic],
+)
 def get_all_absences(session: SessionDep, absence_service: AbsenceServiceDep):
     return absence_service.get_all_absences_service(session)
 
 
-@router.delete("/v1/absences/{training_id}/{trainee_id}/{absence_date}")
+@router.delete(
+    "/v1/absences/{training_id}/{trainee_id}/{absence_date}", response_model=Message
+)
 def delete_absence(
     session: SessionDep,
     training_id: int,
@@ -80,4 +88,4 @@ def delete_absence(
         training_date=absence_date,
         current_user=current_user,
     )
-    return {"detail": "Deleted successfully"}
+    return Message(message="Deleted successfully")

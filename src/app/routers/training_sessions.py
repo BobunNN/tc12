@@ -6,6 +6,7 @@ from src.app.dependencies import (
 )
 from src.app.schemas.training_sessions import (
     TrainingSessionCreate,
+    TrainingSessionPublic,
     TrainingSessionUpdate,
 )
 
@@ -16,6 +17,7 @@ router = APIRouter(tags=["training_sessions"])
 @router.post(
     "/v1/training-sessions",
     dependencies=[Security(get_current_user, scopes=["trainer"])],
+    response_model=TrainingSessionPublic,
 )
 def create_training_session(
     session: SessionDep,
@@ -28,7 +30,9 @@ def create_training_session(
 
 
 @router.get(
-    "/v1/training-sessions/{session_id}", dependencies=[Depends(get_current_user)]
+    "/v1/training-sessions/{session_id}",
+    dependencies=[Depends(get_current_user)],
+    response_model=TrainingSessionPublic,
 )
 def get_training_session(
     session: SessionDep,
@@ -38,7 +42,11 @@ def get_training_session(
     return training_session_service.get_training_session(session, session_id)
 
 
-@router.get("/v1/training-sessions", dependencies=[Depends(get_current_user)])
+@router.get(
+    "/v1/training-sessions",
+    dependencies=[Depends(get_current_user)],
+    response_model=list[TrainingSessionPublic],
+)
 def get_all_training_sessions(
     session: SessionDep,
     training_session_service: TrainingSessionServiceDep,
@@ -51,6 +59,7 @@ def get_all_training_sessions(
 @router.patch(
     "/v1/training-sessions/{session_id}",
     dependencies=[Security(get_current_user, scopes=["trainer"])],
+    response_model=TrainingSessionPublic,
 )
 def update_training_session(
     session: SessionDep,

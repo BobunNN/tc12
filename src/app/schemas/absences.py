@@ -27,3 +27,6 @@ class AbsenceCreate(AbsenceBase):
 
 class AbsenceUpdate(SQLModel):
     status: Literal["pending", "confirmed"] | None = None
+
+
+class AbsencePublic(AbsenceBase): ...

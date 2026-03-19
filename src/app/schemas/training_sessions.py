@@ -56,3 +56,7 @@ class SessionTraineeAssignment(SQLModel, table=True):
         primary_key=True, foreign_key="training_sessions.id"
     )
     trainee_id: int = Field(primary_key=True, foreign_key="user_accounts.id")
+
+
+class TrainingSessionPublic(TrainingSessionBase):
+    pass
