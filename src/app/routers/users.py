@@ -13,16 +13,22 @@ from src.app.dependencies import (
 from src.app.schemas.user import (
     UpdatePassword,
     UserCreate,
+    UserPublic,
     UserRegister,
     UserUpdate,
     UserUpdateMe,
 )
+from src.app.schemas.responses import Message
 
 
 router = APIRouter(tags=["users"])
 
 
-@router.get("/v1/users", dependencies=[Depends(get_current_active_superuser)])
+@router.get(
+    "/v1/users",
+    dependencies=[Depends(get_current_active_superuser)],
+    response_model=list[UserPublic],
+)
 async def read_users(
     session: SessionDep,
     user_service: UserServiceDep,
@@ -35,9 +41,7 @@ async def read_users(
     return user_service.get_all_users(session=session, limit=limit, offset=offset)
 
 
-@router.get(
-    "/v1/users/me",
-)
+@router.get("/v1/users/me", response_model=UserPublic)
 def read_user_me(current_user: CurrentUser) -> Any:
     """
     Get current user.
@@ -45,7 +49,11 @@ def read_user_me(current_user: CurrentUser) -> Any:
     return current_user
 
 
-@router.get("/v1/users/{email}", dependencies=[Depends(get_current_active_superuser)])
+@router.get(
+    "/v1/users/{email}",
+    dependencies=[Depends(get_current_active_superuser)],
+    response_model=UserPublic,
+)
 def fetch_user(
     session: SessionDep,
     email: EmailStr,
@@ -57,7 +65,11 @@ def fetch_user(
     return user_service.get_user_by_email(session=session, email=email)
 
 
-@router.post("/v1/users", dependencies=[Depends(get_current_active_superuser)])
+@router.post(
+    "/v1/users",
+    dependencies=[Depends(get_current_active_superuser)],
+    response_model=UserPublic,
+)
 def create_user(
     session: SessionDep,
     user_create: UserCreate,
@@ -69,14 +81,14 @@ def create_user(
     return user_service.create_user(session=session, user_create=user_create)
 
 
-@router.patch("/v1/users/me")
+@router.patch("/v1/users/me", response_model=UserPublic)
 def update_user_me(
     *,
     session: SessionDep,
     user_in: UserUpdateMe,
     current_user: CurrentUser,
     user_service: UserServiceDep,
-) -> Any:
+):
     """
     Update own user.
     """
@@ -85,7 +97,11 @@ def update_user_me(
     )
 
 
-@router.patch("/v1/users/{email}", dependencies=[Depends(get_current_active_superuser)])
+@router.patch(
+    "/v1/users/{email}",
+    dependencies=[Depends(get_current_active_superuser)],
+    response_model=UserPublic,
+)
 def patch_user(
     session: SessionDep,
     user_patch: UserUpdate,
@@ -100,6 +116,7 @@ def patch_user(
 
 @router.delete(
     "/v1/users/me",
+    response_model=Message,
 )
 def delete_user_me(
     session: SessionDep,
@@ -110,11 +127,13 @@ def delete_user_me(
     Delete own user.
     """
     user_service.delete_me(session=session, current_user=current_user)
-    return "User deleted successfully"
+    return Message(message="User successfully deleted")
 
 
 @router.delete(
-    "/v1/users/{email}", dependencies=[Depends(get_current_active_superuser)]
+    "/v1/users/{email}",
+    dependencies=[Depends(get_current_active_superuser)],
+    response_model=Message,
 )
 def delete_user(
     session: SessionDep,
@@ -125,12 +144,11 @@ def delete_user(
     """
     Delete a user by email. Requires superuser privileges.
     """
-    return user_service.delete_user(
-        session=session, email=email, current_user=current_user
-    )
+    user_service.delete_user(session=session, email=email, current_user=current_user)
+    return Message(message="User successfully deleted")
 
 
-@router.patch("/v1/users/me/password")
+@router.patch("/v1/users/me/password", response_model=Message)
 def update_password_me(
     *,
     session: SessionDep,
@@ -144,17 +162,15 @@ def update_password_me(
     user_service.update_password_me(
         session=session, body=body, current_user=current_user
     )
-    return "Password updated successfully"
+    return Message(message="Password updated successfully")
 
 
-@router.post(
-    "/v1/users/signup",
-)
+@router.post("/v1/users/signup", response_model=UserPublic)
 def register_user(
     session: SessionDep,
     user_in: UserRegister,
     user_service: UserServiceDep,
-) -> Any:
+):
     """
     Create new user without the need to be logged in.
     """

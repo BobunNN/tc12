@@ -82,13 +82,13 @@ def test_update_password_me(client, normal_user_token_headers):
         json={"current_password": "userpass", "new_password": "newsecurepassword123"},
     )
     assert response.status_code == 200
-    assert response.json() == "Password updated successfully"
+    assert response.json() == {"message": "Password updated successfully"}
 
 
 def test_delete_user_me(client, normal_user_token_headers):
     response = client.delete("/v1/users/me", headers=normal_user_token_headers)
     assert response.status_code == 200
-    assert response.json() == "User deleted successfully"
+    assert response.json() == {"message": "User successfully deleted"}
 
 
 def test_delete_user_me_superuser_forbidden(client, superuser_token_headers):

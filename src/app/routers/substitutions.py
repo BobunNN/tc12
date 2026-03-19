@@ -6,15 +6,21 @@ from src.app.dependencies import (
     get_current_active_superuser,
     get_current_user,
 )
+from src.app.schemas.responses import Message
 from src.app.schemas.substitution_requests import (
     SubstitutionRequestCreate,
     SubstitutionRequestUpdate,
+    SubstitutionRequestsPublic,
 )
 
 router = APIRouter(tags=["substitutions"])
 
 
-@router.post("/v1/substitution-requests", dependencies=[Depends(get_current_user)])
+@router.post(
+    "/v1/substitution-requests",
+    dependencies=[Depends(get_current_user)],
+    response_model=SubstitutionRequestsPublic,
+)
 def create_substitution_request(
     session: SessionDep,
     request: SubstitutionRequestCreate,
@@ -26,6 +32,7 @@ def create_substitution_request(
 @router.get(
     "/v1/substitution-requests/me",
     dependencies=[Depends(get_current_user)],
+    response_model=list[SubstitutionRequestsPublic],
 )
 def get_self_substitutions_requests(
     session: SessionDep,
@@ -53,6 +60,7 @@ def get_self_substitutions_requests(
 @router.get(
     "/v1/substitution-requests/{request_id}",
     dependencies=[Depends(get_current_active_superuser)],
+    response_model=SubstitutionRequestsPublic,
 )
 def get_substitution_requests(
     session: SessionDep,
@@ -65,6 +73,7 @@ def get_substitution_requests(
 @router.get(
     "/v1/substitution-requests",
     dependencies=[Depends(get_current_active_superuser)],
+    response_model=list[SubstitutionRequestsPublic],
 )
 def get_all_substitutions(
     session: SessionDep,
@@ -81,6 +90,7 @@ def get_all_substitutions(
 @router.patch(
     "/v1/substitution-requests/{request_id}",
     dependencies=[Depends(get_current_user)],
+    response_model=SubstitutionRequestsPublic,
 )
 def update_substitution(
     session: SessionDep,
@@ -98,6 +108,7 @@ def update_substitution(
 @router.delete(
     "/v1/substitution-requests/{request_id}",
     dependencies=[Depends(get_current_user)],
+    response_model=Message,
 )
 def delete_substitution(
     session: SessionDep,
@@ -106,4 +117,4 @@ def delete_substitution(
     substitution_service: SubstitutionServiceDep,
 ):
     substitution_service.delete_substitution_request(session, request_id, current_user)
-    return {"detail": "Deleted successfully"}
+    return Message(message="Deleted successfully")

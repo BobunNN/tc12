@@ -46,7 +46,7 @@ users = [
 
 sessions = [
     TrainingSessionCreate(
-        day=1,
+        day="1",
         trainer_id=1,
         session_start=time(10),
         session_duration=60,
@@ -54,7 +54,7 @@ sessions = [
         court_number=1,
     ),
     TrainingSessionCreate(
-        day=1,
+        day="1",
         trainer_id=1,
         session_start=time(13),
         session_duration=60,
@@ -62,7 +62,7 @@ sessions = [
         court_number=2,
     ),
     TrainingSessionCreate(
-        day=1,
+        day="1",
         trainer_id=5,
         session_start=time(10),
         session_duration=60,
@@ -70,7 +70,7 @@ sessions = [
         court_number=1,
     ),
     TrainingSessionCreate(
-        day=2,
+        day="2",
         trainer_id=5,
         session_start=time(10),
         session_duration=60,

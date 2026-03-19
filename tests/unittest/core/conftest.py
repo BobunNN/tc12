@@ -115,7 +115,7 @@ def session_training_assignment(
 def training_session_init():
     sessions = [
         TrainingSessions(  # id=1
-            day=1,
+            day="1",
             trainer_id=1,
             session_start=time(10),
             session_duration=60,
@@ -123,7 +123,7 @@ def training_session_init():
             court_number=1,
         ),
         TrainingSessions(  # id=2
-            day=1,
+            day="1",
             trainer_id=1,
             session_start=time(13),
             session_duration=60,
@@ -131,7 +131,7 @@ def training_session_init():
             court_number=2,
         ),
         TrainingSessions(  # id=3
-            day=1,
+            day="1",
             trainer_id=5,
             session_start=time(10),
             session_duration=60,
@@ -139,7 +139,7 @@ def training_session_init():
             court_number=1,
         ),
         TrainingSessions(  # id=4
-            day=2,
+            day="2",
             trainer_id=5,
             session_start=time(10),
             session_duration=60,

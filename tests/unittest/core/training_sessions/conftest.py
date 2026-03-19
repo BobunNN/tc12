@@ -10,7 +10,7 @@ from src.app.schemas.training_sessions import (
 @pytest.fixture
 def training_session_data():
     return TrainingSessionCreate(
-        day=1,
+        day="1",
         trainer_id=1,
         session_start="10:00:00",
         session_duration=60,
@@ -22,7 +22,7 @@ def training_session_data():
 @pytest.fixture
 def training_session_data2():
     return TrainingSessionCreate(
-        day=1,
+        day="1",
         trainer_id=3,
         session_start="10:00:00",
         session_duration=60,
@@ -34,7 +34,7 @@ def training_session_data2():
 @pytest.fixture
 def training_session_overlap():
     return TrainingSessionCreate(
-        day=1,
+        day="1",
         trainer_id=3,
         session_start="10:30:00",
         session_duration=60,
@@ -53,7 +53,7 @@ def training_session_update_overlap():
 @pytest.fixture
 def training_session_invalid_trainer():
     return TrainingSessionCreate(
-        day=6,
+        day="6",
         trainer_id=2,
         session_start="10:00:00",
         session_duration=60,
