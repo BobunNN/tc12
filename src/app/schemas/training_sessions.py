@@ -6,7 +6,9 @@ from sqlmodel import AutoString, Field, SQLModel
 
 
 class TrainingSessionBase(SQLModel):
-    day: Literal[0, 1, 2, 3, 4, 5, 6] = Field(default=None, sa_type=AutoString)
+    day: Literal["0", "1", "2", "3", "4", "5", "6"] = Field(
+        default=None, sa_type=AutoString
+    )
     trainer_id: int | None = Field(default=None, foreign_key="user_accounts.id")
     session_start: time = Field(default=time(hour=10), description="e.g., 19:15")
     session_duration: int = Field(default=60, description="Session duration in MINUTES")
@@ -36,7 +38,9 @@ class TrainingSessions(TrainingSessionBase, table=True):
 
 
 class TrainingSessionUpdate(TrainingSessionBase):
-    day: Literal[0, 1, 2, 3, 4, 5, 6, None] = Field(default=None, sa_type=AutoString)
+    day: Literal["0", "1", "2", "3", "4", "5", "6", None] = Field(
+        default=None, sa_type=AutoString
+    )
     trainer_id: Optional[int] | None = None
     session_start: Optional[time] | None = time(hour=10)
     session_duration: Optional[int] | None = 60
@@ -59,4 +63,4 @@ class SessionTraineeAssignment(SQLModel, table=True):
 
 
 class TrainingSessionPublic(TrainingSessionBase):
-    pass
+    id: int

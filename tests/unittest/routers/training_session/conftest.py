@@ -27,7 +27,7 @@ def setup_trainer(session: Session):
 @pytest.fixture
 def training_session_payload():
     return {
-        "day": 1,
+        "day": "1",
         "trainer_id": 3,
         "session_start": "10:00:00",
         "session_duration": 60,
@@ -39,7 +39,7 @@ def training_session_payload():
 @pytest.fixture
 def training_session_payload2():
     return {
-        "day": 1,
+        "day": "1",
         "trainer_id": 3,
         "session_start": "10:00:00",
         "session_duration": 60,
