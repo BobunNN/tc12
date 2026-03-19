@@ -17,14 +17,13 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(mess
 
 app = FastAPI()
 
-# Optional: Enable CORS (uncomment to use)
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=["*"],  # Adjust as needed
-#     allow_credentials=True,
-#     allow_methods=["*"],
-#     allow_headers=["*"],
-# )
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Adjust as needed
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 exceptions_manager.register_exception_handlers(app)
 

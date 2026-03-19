@@ -81,6 +81,9 @@ class User(UserBase, UserTennisInfo, table=True):
     )
 
 
+class UserPublic(UserBase, UserTennisInfo): ...
+
+
 class UserUpdate(UserBase, UserTennisInfo):
     email: EmailStr | None = Field(default=None, max_length=255)  # type: ignore
     first_name: str | None = Field(default=None, max_length=30)
