@@ -9,7 +9,7 @@ from pydantic_extra_types.phone_numbers import PhoneNumber
 class UserBase(SQLModel):
     first_name: str = Field(max_length=30)
     last_name: str = Field(max_length=30)
-    email: EmailStr = Field(max_length=30, unique=True, nullable=False)
+    email: EmailStr = Field(max_length=50, unique=True, nullable=False)
     is_superuser: bool = False
     is_trainer: bool = False
 
