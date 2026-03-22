@@ -2,6 +2,7 @@ import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware  # noqa
 from src.app.routers import (
+    bulk_load,
     session_trainee_assignment,
     substitutions,
     training_sessions,
@@ -34,6 +35,7 @@ app.include_router(training_sessions.router)
 app.include_router(absences.router)
 app.include_router(init_dev.router)
 app.include_router(session_trainee_assignment.router)
+app.include_router(bulk_load.router)
 
 
 @app.get(
