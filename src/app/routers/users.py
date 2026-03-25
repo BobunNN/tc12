@@ -8,6 +8,7 @@ from src.app.dependencies import (
     SessionDep,
     UserServiceDep,
     get_current_active_superuser,
+    get_current_user,
 )
 
 from src.app.schemas.user import (
@@ -26,7 +27,7 @@ router = APIRouter(tags=["users"])
 
 @router.get(
     "/v1/users",
-    dependencies=[Depends(get_current_active_superuser)],
+    dependencies=[Depends(get_current_user)],
     response_model=list[UserPublic],
 )
 async def read_users(
@@ -41,6 +42,14 @@ async def read_users(
     return user_service.get_all_users(session=session, limit=limit, offset=offset)
 
 
+@router.get("/v1/users/count", dependencies=[Depends(get_current_user)])
+def get_users_count(
+    session: SessionDep,
+    user_service: UserServiceDep,
+) -> int:
+    return user_service.get_count(session)
+
+
 @router.get("/v1/users/me", response_model=UserPublic)
 def read_user_me(current_user: CurrentUser) -> Any:
     """
@@ -51,7 +60,7 @@ def read_user_me(current_user: CurrentUser) -> Any:
 
 @router.get(
     "/v1/users/{email}",
-    dependencies=[Depends(get_current_active_superuser)],
+    dependencies=[Depends(get_current_user)],
     response_model=UserPublic,
 )
 def fetch_user(

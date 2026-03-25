@@ -106,3 +106,6 @@ class UserService:
         if not user:
             raise UserNotFound
         return user.is_trainer
+
+    def get_count(self, session: Session) -> int:
+        return self.crud_users.get_count(session)

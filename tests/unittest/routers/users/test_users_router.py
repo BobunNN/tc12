@@ -5,7 +5,7 @@ def test_get_user(client, normal_user_token_headers, superuser_token_headers):
     res2 = client.get("/v1/users/user@example.com", headers=normal_user_token_headers)
     res3 = client.get("/v1/users/user@example.com", headers=superuser_token_headers)
     assert res1.status_code == 404
-    assert res2.status_code == 403
+    assert res2.status_code == 200
     assert res3.status_code == 200
 
 
@@ -25,10 +25,9 @@ def test_read_all_users_as_superuser(client, superuser_token_headers):
     assert len(data) >= 2  # Should return at least two fixture users
 
 
-def test_read_all_users_as_regular_user_forbidden(client, normal_user_token_headers):
+def test_read_all_users_as_regular_user(client, normal_user_token_headers):
     response = client.get("/v1/users", headers=normal_user_token_headers)
-    assert response.status_code == 403
-    assert response.json()["detail"] == "The user doesn't have enough privileges"
+    assert response.status_code == 200
 
 
 def test_signup(client):
