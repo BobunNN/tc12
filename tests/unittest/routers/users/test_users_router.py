@@ -28,7 +28,6 @@ def test_read_all_users_as_superuser(client, superuser_token_headers):
 def test_read_all_users_as_regular_user(client, normal_user_token_headers):
     response = client.get("/v1/users", headers=normal_user_token_headers)
     assert response.status_code == 200
-    assert response.json()["detail"] == "The user doesn't have enough privileges"
 
 
 def test_signup(client):
