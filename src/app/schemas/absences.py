@@ -21,8 +21,7 @@ class Absences(AbsenceBase, table=True):
     created_at: datetime = Field(default_factory=datetime.now)
 
 
-class AbsenceCreate(AbsenceBase):
-    absence_date: datetime | None = None  # Defaults to next upcoming session day
+class AbsenceCreate(AbsenceBase): ...
 
 
 class AbsenceUpdate(SQLModel):

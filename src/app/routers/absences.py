@@ -52,8 +52,8 @@ def get_absence(
     return absence_service.search_unique_absence(
         session,
         trainee_id=trainee_id,
-        training_id=training_id,
-        training_date=absence_date,
+        training_session_id=training_id,
+        absence_date=absence_date,
     )
 
 
@@ -84,8 +84,8 @@ def delete_absence(
     absence_service.delete_absence_service(
         session,
         trainee_id=trainee_id,
-        training_id=training_id,
-        training_date=absence_date,
+        training_session_id=training_id,
         current_user=current_user,
+        absence_date=absence_date,
     )
     return Message(message="Deleted successfully")

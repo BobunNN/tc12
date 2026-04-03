@@ -12,9 +12,7 @@ from src.app.core.absences.exceptions import (
 from src.app.core.session_trainees_assignment.session_trainee_assignment_service import (
     SessionTraineeAssignmentService,
 )
-from src.app.schemas.training_sessions import (
-    SessionTraineeAssignment,
-)
+
 from src.app.schemas.absences import AbsenceCreate, Absences
 from src.app.schemas.user import User
 
@@ -64,7 +62,7 @@ class AbsenceService:
         if not self.session_absence_date_validation(session, absence_create):
             raise AbsenceDateMismatchSessionDay
 
-        session_trainees_ids: list[SessionTraineeAssignment] = (
+        session_trainees_ids: list[int] = (
             self.session_trainee_assignement_service.get_session_trainees(
                 session=session, session_id=absence_create.training_session_id
             )
@@ -167,3 +165,6 @@ class AbsenceService:
             return self.crud_absences.get_with_filters(
                 session=session, filters={"trainee_id": current_user.id}
             )
+
+    def get_count(self, session: Session) -> int:
+        return self.crud_absences.get_count(session)
