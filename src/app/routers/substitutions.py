@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, Security
 from src.app.dependencies import (
     CurrentUser,
     SessionDep,
@@ -6,6 +8,7 @@ from src.app.dependencies import (
     get_current_active_superuser,
     get_current_user,
 )
+from src.app.schemas.user import User
 from src.app.schemas.responses import Message
 from src.app.schemas.substitution_requests import (
     SubstitutionRequestCreate,
@@ -89,19 +92,18 @@ def get_all_substitutions(
 
 @router.patch(
     "/v1/substitution-requests/{request_id}",
-    dependencies=[Depends(get_current_user)],
     response_model=SubstitutionRequestsPublic,
 )
 def update_substitution(
     session: SessionDep,
     request_id: int,
     request_update: SubstitutionRequestUpdate,
-    # trainer: Annotated[User, Security(get_current_user, scopes=["trainer"])],
+    current_user: Annotated[User, Security(get_current_user, scopes=["trainer"])],
     substitution_service: SubstitutionServiceDep,
 ):
     """Route to approve/decline substitution requests. If one request is approved, all other requests concerning the same available slot may be rejected."""
     return substitution_service.update_substitution_request(
-        session, request_id, request_update
+        session, request_id, request_update, current_user
     )
 
 

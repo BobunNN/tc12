@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Literal
 
 from fastapi import APIRouter, Depends
 from src.app.dependencies import (
@@ -6,6 +7,7 @@ from src.app.dependencies import (
     CurrentUser,
     SessionDep,
     get_current_active_superuser,
+    get_current_user,
 )
 from src.app.schemas.absences import AbsenceCreate, AbsencePublic
 from src.app.schemas.responses import Message
@@ -59,11 +61,15 @@ def get_absence(
 
 @router.get(
     "/v1/absences",
-    dependencies=[Depends(get_current_active_superuser)],
+    dependencies=[Depends(get_current_user)],
     response_model=list[AbsencePublic],
 )
-def get_all_absences(session: SessionDep, absence_service: AbsenceServiceDep):
-    return absence_service.get_all_absences_service(session)
+def get_all_absences(
+    session: SessionDep,
+    absence_service: AbsenceServiceDep,
+    status: Literal["pending", "confirmed"] | None = None,
+):
+    return absence_service.get_all_absences_service(session, status)
 
 
 @router.delete(

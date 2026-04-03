@@ -30,7 +30,9 @@ from src.app.core.session_trainees_assignment.exceptions import (
 )
 from src.app.core.substitutions.exceptions import (
     SubstitutionRequestAlreadyExists,
+    SubstitutionRequestAlreadyReviewed,
     SubstitutionRequestNotFound,
+    TrainerDoesNotManageSubstitutionSession,
 )
 
 
@@ -90,6 +92,14 @@ def register_exception_handlers(app: FastAPI):
     )
     app.add_exception_handler(
         SubstitutionRequestAlreadyExists, handle_substitution_request_already_exists
+    )
+    app.add_exception_handler(
+        TrainerDoesNotManageSubstitutionSession,
+        handle_trainer_does_not_manage_substitution_session,
+    )
+    app.add_exception_handler(
+        SubstitutionRequestAlreadyReviewed,
+        handle_substitution_request_already_reviewed,
     )
 
 
@@ -272,4 +282,22 @@ async def handle_substitution_request_already_exists(
     raise HTTPException(
         status_code=status.HTTP_409_CONFLICT,
         detail="Substitution request already exists for this session, date and requester",
+    )
+
+
+async def handle_trainer_does_not_manage_substitution_session(
+    request: Request, exc: TrainerDoesNotManageSubstitutionSession
+):
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="Trainer does not manage the training session linked to this substitution request",
+    )
+
+
+async def handle_substitution_request_already_reviewed(
+    request: Request, exc: SubstitutionRequestAlreadyReviewed
+):
+    raise HTTPException(
+        status_code=status.HTTP_409_CONFLICT,
+        detail="Substitution request has already been approved or rejected",
     )

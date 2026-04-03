@@ -13,7 +13,7 @@ from src.app.core.session_trainees_assignment.session_trainee_assignment_service
     SessionTraineeAssignmentService,
 )
 
-from src.app.schemas.absences import AbsenceCreate, Absences
+from src.app.schemas.absences import AbsenceCreate, AbsenceUpdate, Absences
 from src.app.schemas.user import User
 
 from src.app.core.absences.crud_absences import (
@@ -89,6 +89,9 @@ class AbsenceService:
     def session_absence_date_validation(
         self, session: Session, absence_create: AbsenceCreate
     ):
+        if absence_create.absence_date is None:
+            return False
+
         training_session = self.training_session_service.get_training_session(
             session=session, session_id=absence_create.training_session_id
         )
@@ -103,8 +106,12 @@ class AbsenceService:
         session: Session,
         trainee_id: int,
         training_session_id: int,
-        absence_date: datetime,
+        absence_date: date,
     ) -> Absences:
+        print("debug")
+        print(trainee_id)
+        print(training_session_id)
+        print(absence_date)
         absence = self.crud_absences.get_by_composite_key(
             session,
             trainee_id=trainee_id,
@@ -115,8 +122,17 @@ class AbsenceService:
             raise AbsenceNotFound
         return absence
 
-    def get_all_absences_service(self, session: Session) -> list[Absences]:
-        return self.crud_absences.get_all(session=session)
+    def get_all_absences_service(
+        self, session: Session, status: str | None = None
+    ) -> list[Absences]:
+        filters = {}
+        if status is not None:
+            filters["status"] = status
+        return (
+            self.crud_absences.get_with_filters(session, filters)
+            if filters
+            else self.crud_absences.get_all(session)
+        )
 
     def delete_absence_service(
         self,
@@ -161,6 +177,24 @@ class AbsenceService:
             return self.crud_absences.get_with_filters(
                 session=session, filters={"trainee_id": current_user.id}
             )
+
+    def get_absences_for_slot(
+        self, session: Session, training_session_id: int, absence_date: date
+    ) -> list[Absences]:
+        return self.crud_absences.get_with_filters(
+            session=session,
+            filters={
+                "training_session_id": training_session_id,
+                "absence_date": absence_date,
+            },
+        )
+
+    def confirm_absence(self, session: Session, absence: Absences) -> Absences:
+        return self.crud_absences.update(
+            session=session,
+            db_obj=absence,
+            obj_in=AbsenceUpdate(status="confirmed"),
+        )
 
     def get_count(self, session: Session) -> int:
         return self.crud_absences.get_count(session)
