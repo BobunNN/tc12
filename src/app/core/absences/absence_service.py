@@ -35,17 +35,14 @@ class AbsenceService:
         self.session_trainee_assignement_service = session_trainee_link_service
         self.crud_absences = crud_absences
 
-    def _next_upcoming_date_for_weekday(self, weekday: int) -> datetime:
-        """Return the next upcoming date (midnight) that falls on the given weekday (0=Mon, 6=Sun)."""
+    def _next_upcoming_date_for_weekday(self, weekday: int) -> date:
+        """Return the next upcoming date that falls on the given weekday (0=Mon, 6=Sun)."""
         today = date.today()
         today_weekday = today.weekday()
         days_ahead = (weekday - today_weekday) % 7
         if days_ahead == 0:
-            days_ahead = (
-                7  # validation requires date > today_midnight, so use next week
-            )
-        next_date = today + timedelta(days=days_ahead)
-        return datetime.combine(next_date, datetime.min.time())
+            days_ahead = 7  # validation requires date > today, so use next week
+        return today + timedelta(days=days_ahead)
 
     def open_absence_slot(
         self, session: Session, absence_create: AbsenceCreate, user: User
@@ -96,10 +93,9 @@ class AbsenceService:
             session=session, session_id=absence_create.training_session_id
         )
 
-        today_midnight = datetime.combine(datetime.today(), datetime.min.time())
         return (
             absence_create.absence_date.weekday() == int(training_session.day)
-            and absence_create.absence_date > today_midnight
+            and absence_create.absence_date > date.today()
         )
 
     def search_unique_absence(
