@@ -105,6 +105,47 @@ class SubstitutionService:
             session=session, filters={"requester_id": current_user.id}
         )
 
+    def _all_absences_covered(
+        self, session: Session, request: SubstitutionRequests
+    ) -> bool:
+        absences = self.absence_service.get_absences_for_slot(
+            session,
+            training_session_id=request.session_id,
+            absence_date=request.absence_date,
+        )
+        return all(a.status == "confirmed" for a in absences)
+
+    def _confirm_one_pending_absence(
+        self, session: Session, request: SubstitutionRequests
+    ) -> None:
+        absences = self.absence_service.get_absences_for_slot(
+            session,
+            training_session_id=request.session_id,
+            absence_date=request.absence_date,
+        )
+        pending = next((a for a in absences if a.status == "pending"), None)
+        if pending:
+            self.absence_service.confirm_absence(session, pending)
+
+    def _reject_pending_siblings(
+        self, session: Session, request: SubstitutionRequests, exclude_id: int
+    ) -> None:
+        siblings = self.crud_substitutions.get_with_filters(
+            session=session,
+            filters={
+                "session_id": request.session_id,
+                "absence_date": request.absence_date,
+            },
+        )
+        decline = SubstitutionRequestUpdate(
+            status="rejected", reviewed_at=datetime.now(UTC)
+        )
+        for sibling in siblings:
+            if sibling.id != exclude_id and sibling.status == "pending":
+                self.crud_substitutions.update(
+                    session=session, db_obj=sibling, obj_in=decline
+                )
+
     def update_substitution_request(
         self,
         session: Session,
@@ -123,39 +164,15 @@ class SubstitutionService:
         if training_session.trainer_id != current_user.id:
             raise TrainerDoesNotManageSubstitutionSession
 
-        status = (
+        new_status = (
             request_update.status
             if isinstance(request_update, SubstitutionRequestUpdate)
             else request_update.get("status")
         )
-        if status == "approved":
-            absences = self.absence_service.get_absences_for_slot(
-                session,
-                training_session_id=request.session_id,
-                absence_date=request.absence_date,
-            )
-            pending_absences = [a for a in absences if a.status == "pending"]
-            if pending_absences:
-                self.absence_service.confirm_absence(session, pending_absences[0])
-
-            # Reject remaining pending sub requests only when all absences are now covered
-            remaining_pending_absences = len(pending_absences) - 1
-            if remaining_pending_absences <= 0:
-                sibling_requests = self.crud_substitutions.get_with_filters(
-                    session=session,
-                    filters={
-                        "session_id": request.session_id,
-                        "absence_date": request.absence_date,
-                    },
-                )
-                decline_update = SubstitutionRequestUpdate(
-                    status="rejected", reviewed_at=datetime.now(UTC)
-                )
-                for sibling in sibling_requests:
-                    if sibling.id != request_id and sibling.status == "pending":
-                        self.crud_substitutions.update(
-                            session=session, db_obj=sibling, obj_in=decline_update
-                        )
+        if new_status == "approved":
+            self._confirm_one_pending_absence(session, request)
+            if self._all_absences_covered(session, request):
+                self._reject_pending_siblings(session, request, exclude_id=request_id)
 
         if isinstance(request_update, SubstitutionRequestUpdate):
             request_update.reviewed_at = datetime.now(UTC)
