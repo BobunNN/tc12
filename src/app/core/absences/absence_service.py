@@ -12,10 +12,8 @@ from src.app.core.absences.exceptions import (
 from src.app.core.session_trainees_assignment.session_trainee_assignment_service import (
     SessionTraineeAssignmentService,
 )
-from src.app.schemas.training_sessions import (
-    SessionTraineeAssignment,
-)
-from src.app.schemas.absences import AbsenceCreate, Absences
+
+from src.app.schemas.absences import AbsenceCreate, AbsenceUpdate, Absences
 from src.app.schemas.user import User
 
 from src.app.core.absences.crud_absences import (
@@ -37,17 +35,14 @@ class AbsenceService:
         self.session_trainee_assignement_service = session_trainee_link_service
         self.crud_absences = crud_absences
 
-    def _next_upcoming_date_for_weekday(self, weekday: int) -> datetime:
-        """Return the next upcoming date (midnight) that falls on the given weekday (0=Mon, 6=Sun)."""
+    def _next_upcoming_date_for_weekday(self, weekday: int) -> date:
+        """Return the next upcoming date that falls on the given weekday (0=Mon, 6=Sun)."""
         today = date.today()
         today_weekday = today.weekday()
         days_ahead = (weekday - today_weekday) % 7
         if days_ahead == 0:
-            days_ahead = (
-                7  # validation requires date > today_midnight, so use next week
-            )
-        next_date = today + timedelta(days=days_ahead)
-        return datetime.combine(next_date, datetime.min.time())
+            days_ahead = 7  # validation requires date > today, so use next week
+        return today + timedelta(days=days_ahead)
 
     def open_absence_slot(
         self, session: Session, absence_create: AbsenceCreate, user: User
@@ -64,7 +59,7 @@ class AbsenceService:
         if not self.session_absence_date_validation(session, absence_create):
             raise AbsenceDateMismatchSessionDay
 
-        session_trainees_ids: list[SessionTraineeAssignment] = (
+        session_trainees_ids: list[int] = (
             self.session_trainee_assignement_service.get_session_trainees(
                 session=session, session_id=absence_create.training_session_id
             )
@@ -94,14 +89,16 @@ class AbsenceService:
     def session_absence_date_validation(
         self, session: Session, absence_create: AbsenceCreate
     ):
+        if absence_create.absence_date is None:
+            return False
+
         training_session = self.training_session_service.get_training_session(
             session=session, session_id=absence_create.training_session_id
         )
 
-        today_midnight = datetime.combine(datetime.today(), datetime.min.time())
         return (
             absence_create.absence_date.weekday() == int(training_session.day)
-            and absence_create.absence_date > today_midnight
+            and absence_create.absence_date > date.today()
         )
 
     def search_unique_absence(
@@ -109,8 +106,12 @@ class AbsenceService:
         session: Session,
         trainee_id: int,
         training_session_id: int,
-        absence_date: datetime,
+        absence_date: date,
     ) -> Absences:
+        print("debug")
+        print(trainee_id)
+        print(training_session_id)
+        print(absence_date)
         absence = self.crud_absences.get_by_composite_key(
             session,
             trainee_id=trainee_id,
@@ -121,8 +122,17 @@ class AbsenceService:
             raise AbsenceNotFound
         return absence
 
-    def get_all_absences_service(self, session: Session) -> list[Absences]:
-        return self.crud_absences.get_all(session=session)
+    def get_all_absences_service(
+        self, session: Session, status: str | None = None
+    ) -> list[Absences]:
+        filters = {}
+        if status is not None:
+            filters["status"] = status
+        return (
+            self.crud_absences.get_with_filters(session, filters)
+            if filters
+            else self.crud_absences.get_all(session)
+        )
 
     def delete_absence_service(
         self,
@@ -167,3 +177,24 @@ class AbsenceService:
             return self.crud_absences.get_with_filters(
                 session=session, filters={"trainee_id": current_user.id}
             )
+
+    def get_absences_for_slot(
+        self, session: Session, training_session_id: int, absence_date: date
+    ) -> list[Absences]:
+        return self.crud_absences.get_with_filters(
+            session=session,
+            filters={
+                "training_session_id": training_session_id,
+                "absence_date": absence_date,
+            },
+        )
+
+    def confirm_absence(self, session: Session, absence: Absences) -> Absences:
+        return self.crud_absences.update(
+            session=session,
+            db_obj=absence,
+            obj_in=AbsenceUpdate(status="confirmed"),
+        )
+
+    def get_count(self, session: Session) -> int:
+        return self.crud_absences.get_count(session)

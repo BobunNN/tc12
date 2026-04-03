@@ -3,10 +3,10 @@ from sqlmodel import Session
 
 from src.app.core.crud.crud_base import CRUDBase
 from src.app.core.security import DUMMY_HASH, get_password_hash, verify_password
-from src.app.schemas.user import User, UserCreate, UserUpdate
+from src.app.schemas.user import User, UserCreate, UserUpdate, UserUpdateMe
 
 
-class CRUDUsers(CRUDBase[User, UserCreate, UserUpdate]):
+class CRUDUsers(CRUDBase[User, UserCreate, UserUpdate | UserUpdateMe]):
     """
     get_by_id, get_all, get_with_filters, create, update, delete_by_id
     are all inherited.

@@ -40,6 +40,7 @@ def init_db(session: Session) -> None:
             last_name=settings.FIRST_SUPERUSER_LASTNAME,
             password=settings.FIRST_SUPERUSER_PASSWORD,
             is_superuser=True,
+            is_trainer=True,
         )
         user = crud.create(session=session, obj_in=user_in)
 

@@ -138,7 +138,7 @@ def get_substitution_service() -> SubstitutionService:
     return SubstitutionService(
         crud_substitutions=CrudSubstitutions(SubstitutionRequests),
         training_session_service=get_training_session_service(),
-        crud_absences=CrudAbsences(Absences),
+        absence_service=get_absence_service(),
     )
 
 

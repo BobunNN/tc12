@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 from typing import Literal
 
 from sqlalchemy import UniqueConstraint
@@ -7,7 +7,7 @@ from sqlmodel import AutoString, Field, SQLModel
 
 class SubstitutionRequestsBase(SQLModel):
     session_id: int = Field(foreign_key="training_sessions.id")
-    absence_date: datetime = Field(description="Date for the absence, e.g. 2026-01-10")
+    absence_date: date = Field(description="Date for the absence, e.g. 2026-01-10")
     requester_id: int = Field(foreign_key="user_accounts.id")
     status: Literal["pending", "approved", "rejected"] = Field(
         default="pending", sa_type=AutoString
@@ -31,9 +31,9 @@ class SubstitutionRequests(SubstitutionRequestsBase, table=True):
 
 class SubstitutionRequestCreate(SQLModel):
     session_id: int
-    absence_date: datetime
+    absence_date: date
     requester_id: int
-    status: Literal["pending", "approved", "rejected"] = "pending"
+    status: Literal["pending", "approved", "rejected", None] = Field(default="pending")
     created_at: datetime | None = Field(default_factory=datetime.now)
     reviewed_at: datetime | None = Field(default_factory=datetime.now)
 

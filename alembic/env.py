@@ -5,6 +5,7 @@ from sqlalchemy import pool
 from src.app.schemas.user import User  # noqa
 from src.app.schemas.training_sessions import TrainingSessions  # noqa
 from src.app.schemas.absences import Absences  # noqa
+from src.app.schemas.substitution_requests import SubstitutionRequests  # noqa
 from alembic import context
 from sqlmodel import SQLModel
 
@@ -47,6 +48,7 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        render_as_batch=True,
     )
 
     with context.begin_transaction():

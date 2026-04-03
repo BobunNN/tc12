@@ -26,7 +26,7 @@ def upgrade() -> None:
         "absences",
         sa.Column("training_session_id", sa.Integer(), nullable=False),
         sa.Column("trainee_id", sa.Integer(), nullable=False),
-        sa.Column("absence_date", sa.DateTime(), nullable=False),
+        sa.Column("absence_date", sa.Date(), nullable=False),
         sa.Column("status", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("created_at", sa.DateTime(), nullable=False),
         sa.ForeignKeyConstraint(

@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Literal
 
 from fastapi import APIRouter, Depends
 from src.app.dependencies import (
@@ -6,6 +7,7 @@ from src.app.dependencies import (
     CurrentUser,
     SessionDep,
     get_current_active_superuser,
+    get_current_user,
 )
 from src.app.schemas.absences import AbsenceCreate, AbsencePublic
 from src.app.schemas.responses import Message
@@ -24,7 +26,7 @@ def create_absence(
     return absence_service.open_absence_slot(session, absence, current_user)
 
 
-@router.get("/v1/absences/me", response_model=AbsencePublic)
+@router.get("/v1/absences/me", response_model=list[AbsencePublic])
 def get_my_absences(
     session: SessionDep,
     current_user: CurrentUser,
@@ -52,18 +54,22 @@ def get_absence(
     return absence_service.search_unique_absence(
         session,
         trainee_id=trainee_id,
-        training_id=training_id,
-        training_date=absence_date,
+        training_session_id=training_id,
+        absence_date=absence_date,
     )
 
 
 @router.get(
     "/v1/absences",
-    dependencies=[Depends(get_current_active_superuser)],
+    dependencies=[Depends(get_current_user)],
     response_model=list[AbsencePublic],
 )
-def get_all_absences(session: SessionDep, absence_service: AbsenceServiceDep):
-    return absence_service.get_all_absences_service(session)
+def get_all_absences(
+    session: SessionDep,
+    absence_service: AbsenceServiceDep,
+    status: Literal["pending", "confirmed"] | None = None,
+):
+    return absence_service.get_all_absences_service(session, status)
 
 
 @router.delete(
@@ -84,8 +90,8 @@ def delete_absence(
     absence_service.delete_absence_service(
         session,
         trainee_id=trainee_id,
-        training_id=training_id,
-        training_date=absence_date,
+        training_session_id=training_id,
         current_user=current_user,
+        absence_date=absence_date,
     )
     return Message(message="Deleted successfully")
