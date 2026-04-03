@@ -1,4 +1,4 @@
-class SessionTraineeAssignementAlreadyExists(Exception):
+class SessionTraineeAssignmentAlreadyExists(Exception):
     pass
 
 

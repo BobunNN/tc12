@@ -32,7 +32,7 @@ class AbsenceService:
         crud_absences: CrudAbsences,
     ):
         self.training_session_service = training_session_service
-        self.session_trainee_assignement_service = session_trainee_link_service
+        self.session_trainee_assignment_service = session_trainee_link_service
         self.crud_absences = crud_absences
 
     def _next_upcoming_date_for_weekday(self, weekday: int) -> date:
@@ -60,7 +60,7 @@ class AbsenceService:
             raise AbsenceDateMismatchSessionDay
 
         session_trainees_ids: list[int] = (
-            self.session_trainee_assignement_service.get_session_trainees(
+            self.session_trainee_assignment_service.get_session_trainees(
                 session=session, session_id=absence_create.training_session_id
             )
         )

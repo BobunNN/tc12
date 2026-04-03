@@ -1,7 +1,7 @@
 import pytest
 
 from src.app.core.session_trainees_assignment.exceptions import (
-    SessionTraineeAssignementAlreadyExists,
+    SessionTraineeAssignmentAlreadyExists,
     TraineeIsTrainer,
     TraineesHasOverlappingSessions,
 )
@@ -81,7 +81,7 @@ def test_create_duplicate(session_training_assignment, new_training_assignment):
         new_training_assignment.trainee_id,
     )
 
-    with pytest.raises(SessionTraineeAssignementAlreadyExists):
+    with pytest.raises(SessionTraineeAssignmentAlreadyExists):
         training_assignment_service.create_session_trainees_link(
             session_training_assignment,
             new_training_assignment.training_session_id,

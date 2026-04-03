@@ -7,11 +7,11 @@ from src.app.dependencies import (
 )
 
 
-router = APIRouter(tags=["session_trainee_assignement"])
+router = APIRouter(tags=["session_trainee_assignment"])
 
 
 @router.post(
-    "/v1/session-trainee-assignement",
+    "/v1/session-trainee-assignment",
     dependencies=[Security(get_current_user, scopes=["trainer"])],
 )
 def create_session_trainee_link(
@@ -26,7 +26,7 @@ def create_session_trainee_link(
 
 
 @router.get(
-    "/v1/session-trainee-assignement/{session_id}",
+    "/v1/session-trainee-assignment/{session_id}",
     dependencies=[Depends(get_current_user)],
 )
 def get_session_trainees(
@@ -38,7 +38,7 @@ def get_session_trainees(
 
 
 @router.get(
-    "/v1/session-trainee-assignement/user/me",
+    "/v1/session-trainee-assignment/user/me",
 )
 def get_self_sessions(
     session: SessionDep,
@@ -49,7 +49,7 @@ def get_self_sessions(
 
 
 @router.get(
-    "/v1/session-trainee-assignement/user/{trainee_id}",
+    "/v1/session-trainee-assignment/user/{trainee_id}",
     dependencies=[Depends(get_current_user)],
 )
 def get_user_sessions(
@@ -61,7 +61,7 @@ def get_user_sessions(
 
 
 @router.delete(
-    "/v1/session-trainee-assignement/{session_id}/{trainee_id}",
+    "/v1/session-trainee-assignment/{session_id}/{trainee_id}",
     dependencies=[Security(get_current_user, scopes=["trainer"])],
 )
 def delete_session_trainee_link(
@@ -77,10 +77,10 @@ def delete_session_trainee_link(
 
 
 @router.get(
-    "/v1/session-trainee-assignement",
+    "/v1/session-trainee-assignment",
     dependencies=[Depends(get_current_user)],
 )
-def get_all_assignements(
+def get_all_assignments(
     session: SessionDep,
     session_trainee_link_service: SessionTraineeLinkServiceDep,
 ):

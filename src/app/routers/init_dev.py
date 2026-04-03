@@ -98,11 +98,11 @@ def init_training_sessions(
         training_session_service.create_training_session(session, se)
 
 
-@router.get("/init-trainees-assignement", tags=["test"])
+@router.get("/init-trainees-assignment", tags=["test"])
 def init_trainees(
     session: SessionDep,
-    session_assignement_service: SessionTraineeLinkServiceDep,
+    session_assignment_service: SessionTraineeLinkServiceDep,
 ):
     sessions_trainees = [(2, 1), (3, 1), (2, 4)]
     for se in sessions_trainees:
-        session_assignement_service.create_session_trainees_link(session, se[0], se[1])
+        session_assignment_service.create_session_trainees_link(session, se[0], se[1])
