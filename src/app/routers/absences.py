@@ -24,7 +24,7 @@ def create_absence(
     return absence_service.open_absence_slot(session, absence, current_user)
 
 
-@router.get("/v1/absences/me", response_model=AbsencePublic)
+@router.get("/v1/absences/me", response_model=list[AbsencePublic])
 def get_my_absences(
     session: SessionDep,
     current_user: CurrentUser,
