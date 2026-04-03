@@ -16,7 +16,7 @@ class SubstitutionRequestsBase(SQLModel):
 
 
 class SubstitutionRequests(SubstitutionRequestsBase, table=True):
-    __tablename__ = "substition_requests"
+    __tablename__ = "substitution_requests"
     __table_args__ = (
         UniqueConstraint(
             "session_id",

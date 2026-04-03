@@ -3,7 +3,7 @@ from src.app.core.session_trainees_assignment.crud_session_trainees import (
     CRUDSessionTraineeAssignment,
 )
 from src.app.core.session_trainees_assignment.exceptions import (
-    SessionTraineeAssignementAlreadyExists,
+    SessionTraineeAssignmentAlreadyExists,
     SessionTraineesLinkNotFound,
     TraineeIsTrainer,
     TraineesHasOverlappingSessions,
@@ -36,7 +36,7 @@ class SessionTraineeAssignmentService:
     def create_session_trainees_link(
         self, session: Session, session_id: int, trainee_id: int
     ) -> SessionTraineeAssignment:
-        new_assignement = SessionTraineeAssignment(
+        new_assignment = SessionTraineeAssignment(
             training_session_id=session_id, trainee_id=trainee_id
         )
 
@@ -50,16 +50,16 @@ class SessionTraineeAssignmentService:
         )
 
         if existing:
-            raise SessionTraineeAssignementAlreadyExists
+            raise SessionTraineeAssignmentAlreadyExists
 
         if self.user_service.check_is_trainer(session, trainee_id):
             raise TraineeIsTrainer
 
-        if self.check_trainee_session_overlap(session, trainee_id, new_assignement):
+        if self.check_trainee_session_overlap(session, trainee_id, new_assignment):
             raise TraineesHasOverlappingSessions
 
         return self.crud_session_trainees_link.create(
-            session=session, obj_in=new_assignement
+            session=session, obj_in=new_assignment
         )
 
     def get_session_trainees(self, session: Session, session_id: int) -> list[int]:
@@ -91,7 +91,7 @@ class SessionTraineeAssignmentService:
             trainee_id (int): _description_
 
         Returns:
-            list[SessionTraineeAssignement]: _description_
+            list[SessionTraineeAssignment]: _description_
         """
         return self.crud_session_trainees_link.get_with_filters(
             session=session, filters={"trainee_id": trainee_id}
@@ -125,7 +125,7 @@ class SessionTraineeAssignmentService:
         """
         trainee_sessions_all = self.get_user_session(session, trainee_id)
 
-        training_assignement = self.training_session_service.get_training_session(
+        training_assignment = self.training_session_service.get_training_session(
             session=session, session_id=session_to_assign.training_session_id
         )
 
@@ -137,8 +137,8 @@ class SessionTraineeAssignmentService:
             if not existing_session:
                 continue
 
-            if existing_session.day == training_assignement.day:
-                if existing_session.overlaps_with(training_assignement):
+            if existing_session.day == training_assignment.day:
+                if existing_session.overlaps_with(training_assignment):
                     return True
 
         return False

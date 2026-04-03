@@ -129,7 +129,7 @@ def get_training_session_service() -> TrainingSessionService:
 def get_absence_service() -> AbsenceService:
     return AbsenceService(
         training_session_service=get_training_session_service(),
-        session_trainee_link_service=get_session_trainee_assignement_service(),
+        session_trainee_link_service=get_session_trainee_assignment_service(),
         crud_absences=CrudAbsences(Absences),
     )
 
@@ -142,7 +142,7 @@ def get_substitution_service() -> SubstitutionService:
     )
 
 
-def get_session_trainee_assignement_service() -> SessionTraineeAssignmentService:
+def get_session_trainee_assignment_service() -> SessionTraineeAssignmentService:
     return SessionTraineeAssignmentService(
         crud_session_trainees_link=CRUDSessionTraineeAssignment(
             SessionTraineeAssignment
@@ -158,7 +158,7 @@ TrainingSessionServiceDep = Annotated[
     TrainingSessionService, Depends(get_training_session_service)
 ]
 SessionTraineeLinkServiceDep = Annotated[
-    SessionTraineeAssignmentService, Depends(get_session_trainee_assignement_service)
+    SessionTraineeAssignmentService, Depends(get_session_trainee_assignment_service)
 ]
 SubstitutionServiceDep = Annotated[
     SubstitutionService, Depends(get_substitution_service)
