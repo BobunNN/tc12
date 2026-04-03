@@ -37,7 +37,7 @@ async def read_users(
     offset: int = 0,
 ):
     """
-    Retrieve a list of users with pagination. Requires superuser privileges.
+    Retrieve a list of users with pagination.
     """
     return user_service.get_all_users(session=session, limit=limit, offset=offset)
 
@@ -69,7 +69,7 @@ def fetch_user(
     user_service: UserServiceDep,
 ):
     """
-    Retrieve a user by email. Requires superuser privileges.
+    Retrieve a user by email.
     """
     return user_service.get_user_by_email(session=session, email=email)
 

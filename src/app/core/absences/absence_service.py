@@ -108,10 +108,6 @@ class AbsenceService:
         training_session_id: int,
         absence_date: date,
     ) -> Absences:
-        print("debug")
-        print(trainee_id)
-        print(training_session_id)
-        print(absence_date)
         absence = self.crud_absences.get_by_composite_key(
             session,
             trainee_id=trainee_id,
